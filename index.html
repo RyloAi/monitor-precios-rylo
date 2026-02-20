@@ -511,8 +511,9 @@
             filterTable();
         }
 
-        window.addEventListener('load', loadData);
-        setInterval(loadData, REFRESH_INTERVAL_MIN * 60 * 1000);
+      window.addEventListener('load', loadData);
+      setInterval(loadData, 5 * 60 * 1000); // auto-refresh cada 5 minutos
     </script>
 </body>
 </html>
+
