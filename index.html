@@ -226,6 +226,8 @@
         // Archivo → Compartir → Publicar en la web → elegí hoja "Data" → CSV
         // ============================================================
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
+        const REFRESH_INTERVAL_MIN = 5; // cada cuántos minutos se actualiza automáticamente
+
         let allData = [];
         let charts = {};
         let sortState = { column: null, asc: true };
@@ -233,32 +235,41 @@
         // ============================================================
         // CSV Parser robusto
         // ============================================================
+
+        // Limpia precios con formato "$51,909.00" → 51909
+        function cleanPrice(val) {
+            return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0;
+        }
+
         function parseCSV(csvText) {
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) throw new Error('El CSV está vacío');
 
+            // Headers: normalizar ignorando encoding roto (Precio MÃ­nimo → igual se detecta por posición)
             const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
             console.log('Headers detectados:', headers);
 
-            // Índices de columnas — coinciden con la hoja Data
+            // Buscar por nombre, con fallback por posición fija (orden de tu hoja: Tienda, Producto, Precio Mínimo, Precio Venta, Link, ID)
+            const findIdx = (keywords, fallback) => {
+                const found = headers.findIndex(h => keywords.some(k => h.includes(k)));
+                return found !== -1 ? found : fallback;
+            };
+
             const idx = {
-                tienda:      headers.findIndex(h => h.includes('tienda') || h.includes('store') || h.includes('vendedor')),
-                producto:    headers.findIndex(h => h.includes('producto') || h.includes('product') || h.includes('sku') || h.includes('item')),
-                precioMin:   headers.findIndex(h => h.includes('mínimo') || h.includes('minimo') || h.includes('min')),
-                precioVenta: headers.findIndex(h => (h.includes('precio') && h.includes('venta')) || h.includes('sale') || h.includes('venta')),
-                link:        headers.findIndex(h => h.includes('link') || h.includes('url') || h.includes('publicaci')),
-                id:          headers.findIndex(h => h === 'id' || h.includes('mla')),
+                tienda:      findIdx(['tienda', 'store', 'vendedor'], 0),
+                producto:    findIdx(['producto', 'product', 'item', 'sku'], 1),
+                precioMin:   findIdx(['nimo', 'minimo', 'min price'], 2),  // "nimo" captura "mínimo" aunque venga con encoding roto
+                precioVenta: findIdx(['venta', 'sale'], 3),
+                link:        findIdx(['link', 'url', 'publicaci'], 4),
+                id:          findIdx(['id'], 5),
             };
             console.log('Índices columnas:', idx);
-
-            if (idx.tienda === -1 || idx.precioMin === -1 || idx.precioVenta === -1)
-                throw new Error('No se encontraron las columnas esperadas. Headers: ' + headers.join(', '));
 
             const data = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
 
-                // Split CSV respetando comillas
+                // Split CSV respetando comillas (maneja "$51,909.00" sin romper)
                 const values = [];
                 let inQ = false, cur = '';
                 for (const ch of lines[i]) {
@@ -268,29 +279,22 @@
                 }
                 values.push(cur.trim().replace(/^"|"$/g, ''));
 
-                const get = (i) => (i >= 0 ? values[i] || '' : '');
+                const get = (i) => (i >= 0 && i < values.length ? values[i] || '' : '');
 
-                const precioMin   = parseFloat(get(idx.precioMin).replace(',', '.'))   || 0;
-                const precioVenta = parseFloat(get(idx.precioVenta).replace(',', '.')) || 0;
+                // Limpiar precios: saca $, comas de miles → número limpio
+                const precioMin   = cleanPrice(get(idx.precioMin));
+                const precioVenta = cleanPrice(get(idx.precioVenta));
 
-                if (precioMin === 0 && precioVenta === 0) continue; // saltar filas sin precios
+                if (precioMin === 0 && precioVenta === 0) continue;
 
-                // Calcular diferencia y % directamente (no depende del Sheet)
-                const diferencia  = precioVenta - precioMin;                     // negativo = por debajo
-                const porcentaje  = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
+                const diferencia = precioVenta - precioMin;
+                const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
 
-                // Extraer URL del HYPERLINK si viene como fórmula, o usarlo directo
-                let linkRaw = get(idx.link);
+                // Link: el HYPERLINK se pierde al exportar CSV, construirlo desde el ID
+                const id = get(idx.id).trim();
                 let linkUrl = '';
-                const match = linkRaw.match(/HYPERLINK\("([^"]+)"/i);
-                if (match) linkUrl = match[1];
-                else if (linkRaw.startsWith('http')) linkUrl = linkRaw;
-
-                // Si no hay link pero hay ID, construirlo
-                const id = get(idx.id);
-                if (!linkUrl && id) {
-                    const cleanId = id.replace('MLA', 'MLA-');
-                    linkUrl = `https://articulo.mercadolibre.com.ar/${cleanId}`;
+                if (id && id.toUpperCase().startsWith('MLA')) {
+                    linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`;
                 }
 
                 data.push({
@@ -305,7 +309,7 @@
                 });
             }
 
-            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos');
+            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos. Revisá que la hoja "Data" tenga registros.');
             return data;
         }
 
@@ -508,7 +512,7 @@
         }
 
         window.addEventListener('load', loadData);
+        setInterval(loadData, REFRESH_INTERVAL_MIN * 60 * 1000);
     </script>
 </body>
 </html>
-
