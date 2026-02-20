@@ -10,110 +10,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
         .fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .hover-lift {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .hover-lift:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
-        }
-        .severity-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .severity-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-        .severity-low { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+        .severity-high   { background: rgba(239,68,68,0.2);   color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+        .severity-medium { background: rgba(245,158,11,0.2);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+        .severity-low    { background: rgba(16,185,129,0.2);  color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        .loading-spinner {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top: 3px solid #3b82f6;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #3b82f6; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .logo-container {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .logo-container::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .logo-container:hover::before { opacity: 1; }
-        
-        .logo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            position: relative;
-            z-index: 1;
-            filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
-        }
-
-        .logo-fallback {
-            display: none;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            color: #60a5fa;
-            font-weight: bold;
-            font-size: 20px;
-            position: relative;
-            z-index: 1;
-        }
+        .logo-container { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.1)); border:1px solid rgba(59,130,246,0.2); display:flex; align-items:center; justify-content:center; padding:6px; position:relative; overflow:hidden; }
+        .logo-container::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2)); opacity:0; transition:opacity 0.3s; }
+        .logo-container:hover::before { opacity:1; }
+        .logo-img { width:100%; height:100%; object-fit:contain; position:relative; z-index:1; filter:drop-shadow(0 0 8px rgba(139,92,246,0.4)); }
+        .logo-fallback { display:none; width:100%; height:100%; align-items:center; justify-content:center; color:#60a5fa; font-weight:bold; font-size:20px; position:relative; z-index:1; }
+        .link-btn { display:inline-flex; align-items:center; gap:4px; color:#60a5fa; font-size:11px; padding:2px 8px; border-radius:4px; border:1px solid rgba(96,165,250,0.3); background:rgba(96,165,250,0.05); transition:all 0.15s; white-space:nowrap; }
+        .link-btn:hover { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.6); }
     </style>
 </head>
 <body class="text-slate-200 antialiased">
-    
+
     <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="logo-container">
-                        <img 
-                            src="logo-rylo.png" 
-                            alt="Rylo" 
-                            class="logo-img"
-                            onload="this.style.display='block'; this.nextElementSibling.style.display='none';"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                        >
+                        <img src="logo-rylo.png" alt="Rylo" class="logo-img"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="logo-fallback">R</div>
                     </div>
-                    
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-xl text-white tracking-tight">Monitor de Precios</h1>
@@ -123,7 +52,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="loadData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 hover:shadow-blue-600/40 active:scale-95">
+                    <button onclick="loadData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 active:scale-95">
                         <i class="fas fa-sync-alt" id="refresh-icon"></i>
                         <span class="hidden sm:inline">Actualizar Datos</span>
                     </button>
@@ -137,28 +66,23 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        
-        <!-- Loading State -->
+
         <div id="loading-state" class="hidden flex-col items-center justify-center py-20">
             <div class="loading-spinner mb-4"></div>
             <p class="text-slate-400">Cargando datos desde Google Sheets...</p>
         </div>
 
-        <!-- Error State -->
         <div id="error-state" class="hidden glass-panel rounded-2xl p-8 text-center border border-red-500/30">
             <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
             <h3 class="text-lg font-semibold text-white mb-2">Error al cargar datos</h3>
-            <p class="text-slate-400 mb-2" id="error-message">No se pudieron obtener los datos del Google Sheet.</p>
-            <p class="text-slate-500 text-xs mb-4">Verificá que el Sheet esté publicado como CSV en: Archivo → Compartir → Publicar en la web → CSV</p>
-            <button onclick="loadData()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
-                Reintentar
-            </button>
+            <p class="text-slate-400 mb-2" id="error-message"></p>
+            <p class="text-slate-500 text-xs mb-4">Verificá que el Sheet esté publicado: Archivo → Compartir → Publicar en la web → Hoja "Data" → CSV</p>
+            <button onclick="loadData()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">Reintentar</button>
         </div>
 
-        <!-- Dashboard Content -->
         <div id="dashboard-content" class="space-y-6">
-            
-            <!-- KPIs Cards -->
+
+            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
                 <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
                     <div class="flex justify-between items-start mb-4">
@@ -170,11 +94,8 @@
                             <i class="fas fa-exclamation-circle text-red-400"></i>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm">
-                        <span class="text-slate-500">registros activos</span>
-                    </div>
+                    <span class="text-slate-500 text-sm">registros activos</span>
                 </div>
-
                 <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -185,11 +106,8 @@
                             <i class="fas fa-store text-orange-400"></i>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm">
-                        <span class="text-slate-500">vendedores únicos</span>
-                    </div>
+                    <span class="text-slate-500 text-sm">vendedores únicos</span>
                 </div>
-
                 <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -200,11 +118,8 @@
                             <i class="fas fa-box text-amber-400"></i>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm">
-                        <span class="text-slate-500">diferentes SKU</span>
-                    </div>
+                    <span class="text-slate-500 text-sm">diferentes SKU</span>
                 </div>
-
                 <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -215,36 +130,29 @@
                             <i class="fas fa-percentage text-emerald-400"></i>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm">
-                        <span class="text-slate-500">por debajo del mínimo</span>
-                    </div>
+                    <span class="text-slate-500 text-sm">por debajo del mínimo</span>
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style="animation-delay: 0.1s">
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style="animation-delay:0.1s">
                 <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-1">Top 10 Tiendas Infractoras</h3>
                     <p class="text-sm text-slate-400 mb-4">Por cantidad de infracciones</p>
-                    <div class="h-64">
-                        <canvas id="storesChart"></canvas>
-                    </div>
+                    <div class="h-64"><canvas id="storesChart"></canvas></div>
                 </div>
-
                 <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-1">Productos Más Infringidos</h3>
                     <p class="text-sm text-slate-400 mb-4">Por volumen de infracciones</p>
-                    <div class="h-64">
-                        <canvas id="productsChart"></canvas>
-                    </div>
+                    <div class="h-64"><canvas id="productsChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- Severidad y Alertas -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style="animation-delay: 0.2s">
+            <!-- Severidad + Alertas -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style="animation-delay:0.2s">
                 <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-4">Distribución por Severidad</h3>
-                    <div class="h-48 relative flex items-center justify-center">
+                    <div class="h-48 flex items-center justify-center">
                         <canvas id="severityChart"></canvas>
                     </div>
                     <div class="mt-4 space-y-2 text-sm">
@@ -262,27 +170,27 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-4">Alertas Críticas</h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto" id="alerts-container">
-                        <p class="text-slate-500 text-sm">Cargando alertas...</p>
+                        <p class="text-slate-500 text-sm">Cargando...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla Detallada -->
-            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/50 fade-in" style="animation-delay: 0.3s">
+            <!-- Tabla -->
+            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/50 fade-in" style="animation-delay:0.3s">
                 <div class="p-6 border-b border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h3 class="text-lg font-semibold text-white">Detalle de Infracciones</h3>
-                        <p class="text-sm text-slate-400">Listado completo de tiendas y productos</p>
+                        <p class="text-sm text-slate-400">Listado completo · click en "Ver" para abrir la publicación</p>
                     </div>
                     <div class="flex gap-2 w-full md:w-auto">
-                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..." 
+                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..."
                                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64"
                                onkeyup="filterTable()">
-                        <select id="filter-severity" onchange="filterTable()" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
+                        <select id="filter-severity" onchange="filterTable()"
+                                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
                             <option value="all">Todas</option>
                             <option value="high">Críticas</option>
                             <option value="medium">Medias</option>
@@ -290,7 +198,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-800/80 text-slate-400 sticky top-0 z-10">
                             <tr>
@@ -300,10 +208,10 @@
                                 <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioVenta')">Precio Venta <i class="fas fa-sort ml-1"></i></th>
                                 <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('diferencia')">Diferencia <i class="fas fa-sort ml-1"></i></th>
                                 <th class="px-6 py-3 font-medium text-center">Severidad</th>
+                                <th class="px-6 py-3 font-medium text-center">Publicación</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800" id="table-body">
-                        </tbody>
+                        <tbody class="divide-y divide-slate-800" id="table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -313,99 +221,92 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN — Cambiá esta URL si publicás otro Sheet
+        // CONFIGURACIÓN
+        // Publicá la hoja "Data" como CSV en Google Sheets y pegá la URL acá:
+        // Archivo → Compartir → Publicar en la web → elegí hoja "Data" → CSV
         // ============================================================
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?output=csv';
-
-        // Mapeo flexible de columnas — ajustá si tus encabezados difieren
-        const COL_MAP = {
-            tienda:      ['tienda', 'store', 'vendedor'],
-            producto:    ['producto', 'product', 'item', 'sku'],
-            precioMin:   ['precio mínimo', 'precio minimo', 'min price', 'precio min'],
-            precioVenta: ['precio venta', 'sale price', 'precio de venta', 'venta'],
-            diferencia:  ['diferencia ($)', 'diferencia', 'diff', 'dif'],
-            porcentaje:  ['% por debajo', '% debajo', 'porcentaje', 'percent', '%']
-        };
 
         let allData = [];
         let charts = {};
         let sortState = { column: null, asc: true };
 
         // ============================================================
-        // Helpers
+        // CSV Parser robusto
         // ============================================================
-        function findHeader(headers, candidates) {
-            for (const c of candidates) {
-                const found = headers.find(h => h.toLowerCase().trim() === c);
-                if (found) return found;
-            }
-            // Fallback: buscar cualquiera que contenga la palabra clave
-            for (const c of candidates) {
-                const found = headers.find(h => h.toLowerCase().includes(c));
-                if (found) return found;
-            }
-            return null;
-        }
-
         function parseCSV(csvText) {
             const lines = csvText.trim().split('\n');
-            if (lines.length < 2) throw new Error('El CSV está vacío o solo tiene encabezados');
+            if (lines.length < 2) throw new Error('El CSV está vacío');
 
-            const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+            console.log('Headers detectados:', headers);
 
-            // Detectar columnas automáticamente
-            const colTienda      = findHeader(rawHeaders, COL_MAP.tienda);
-            const colProducto    = findHeader(rawHeaders, COL_MAP.producto);
-            const colPrecioMin   = findHeader(rawHeaders, COL_MAP.precioMin);
-            const colPrecioVenta = findHeader(rawHeaders, COL_MAP.precioVenta);
-            const colDiferencia  = findHeader(rawHeaders, COL_MAP.diferencia);
-            const colPorcentaje  = findHeader(rawHeaders, COL_MAP.porcentaje);
+            // Índices de columnas — coinciden con la hoja Data
+            const idx = {
+                tienda:      headers.findIndex(h => h.includes('tienda') || h.includes('store') || h.includes('vendedor')),
+                producto:    headers.findIndex(h => h.includes('producto') || h.includes('product') || h.includes('sku') || h.includes('item')),
+                precioMin:   headers.findIndex(h => h.includes('mínimo') || h.includes('minimo') || h.includes('min')),
+                precioVenta: headers.findIndex(h => (h.includes('precio') && h.includes('venta')) || h.includes('sale') || h.includes('venta')),
+                link:        headers.findIndex(h => h.includes('link') || h.includes('url') || h.includes('publicaci')),
+                id:          headers.findIndex(h => h === 'id' || h.includes('mla')),
+            };
+            console.log('Índices columnas:', idx);
 
-            console.log('Columnas detectadas:', { colTienda, colProducto, colPrecioMin, colPrecioVenta, colDiferencia, colPorcentaje });
+            if (idx.tienda === -1 || idx.precioMin === -1 || idx.precioVenta === -1)
+                throw new Error('No se encontraron las columnas esperadas. Headers: ' + headers.join(', '));
 
             const data = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
 
-                // Parser CSV robusto (maneja comas dentro de comillas)
+                // Split CSV respetando comillas
                 const values = [];
-                let inQuotes = false;
-                let currentValue = '';
-                for (const char of lines[i]) {
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        values.push(currentValue.trim().replace(/^"|"$/g, ''));
-                        currentValue = '';
-                    } else {
-                        currentValue += char;
-                    }
+                let inQ = false, cur = '';
+                for (const ch of lines[i]) {
+                    if (ch === '"') { inQ = !inQ; }
+                    else if (ch === ',' && !inQ) { values.push(cur.trim().replace(/^"|"$/g, '')); cur = ''; }
+                    else { cur += ch; }
                 }
-                values.push(currentValue.trim().replace(/^"|"$/g, ''));
+                values.push(cur.trim().replace(/^"|"$/g, ''));
 
-                const row = {};
-                rawHeaders.forEach((h, idx) => { row[h] = values[idx] || ''; });
+                const get = (i) => (i >= 0 ? values[i] || '' : '');
 
-                // Saltar filas vacías
-                if (!row[colTienda] && !row[colProducto]) continue;
+                const precioMin   = parseFloat(get(idx.precioMin).replace(',', '.'))   || 0;
+                const precioVenta = parseFloat(get(idx.precioVenta).replace(',', '.')) || 0;
 
-                // Parsear porcentaje: puede venir como -0.1818, -18.18%, 18.18, etc.
-                let pct = parseFloat((row[colPorcentaje] || '0').replace('%', '').replace(',', '.')) || 0;
-                // Si el valor absoluto es <= 1, asumimos que es decimal (ej: -0.1818 → 18.18%)
-                if (Math.abs(pct) <= 1) pct = Math.abs(pct) * 100;
-                else pct = Math.abs(pct);
+                if (precioMin === 0 && precioVenta === 0) continue; // saltar filas sin precios
+
+                // Calcular diferencia y % directamente (no depende del Sheet)
+                const diferencia  = precioVenta - precioMin;                     // negativo = por debajo
+                const porcentaje  = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
+
+                // Extraer URL del HYPERLINK si viene como fórmula, o usarlo directo
+                let linkRaw = get(idx.link);
+                let linkUrl = '';
+                const match = linkRaw.match(/HYPERLINK\("([^"]+)"/i);
+                if (match) linkUrl = match[1];
+                else if (linkRaw.startsWith('http')) linkUrl = linkRaw;
+
+                // Si no hay link pero hay ID, construirlo
+                const id = get(idx.id);
+                if (!linkUrl && id) {
+                    const cleanId = id.replace('MLA', 'MLA-');
+                    linkUrl = `https://articulo.mercadolibre.com.ar/${cleanId}`;
+                }
 
                 data.push({
-                    tienda:      row[colTienda]      || '(sin nombre)',
-                    producto:    row[colProducto]    || '(sin producto)',
-                    precioMin:   parseFloat((row[colPrecioMin]   || '0').replace(',', '.')) || 0,
-                    precioVenta: parseFloat((row[colPrecioVenta] || '0').replace(',', '.')) || 0,
-                    diferencia:  parseFloat((row[colDiferencia]  || '0').replace(',', '.')) || 0,
-                    porcentaje:  pct
+                    tienda:      get(idx.tienda)   || '(sin nombre)',
+                    producto:    get(idx.producto) || '(sin producto)',
+                    precioMin,
+                    precioVenta,
+                    diferencia,
+                    porcentaje,
+                    link: linkUrl,
+                    id
                 });
             }
 
-            if (data.length === 0) throw new Error('Se parseó el CSV pero no se encontraron filas de datos. Verificá los nombres de columnas: ' + rawHeaders.join(', '));
+            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos');
             return data;
         }
 
@@ -413,9 +314,9 @@
         // Carga de datos
         // ============================================================
         async function loadData() {
-            const loadingEl  = document.getElementById('loading-state');
-            const errorEl    = document.getElementById('error-state');
-            const contentEl  = document.getElementById('dashboard-content');
+            const loadingEl   = document.getElementById('loading-state');
+            const errorEl     = document.getElementById('error-state');
+            const contentEl   = document.getElementById('dashboard-content');
             const refreshIcon = document.getElementById('refresh-icon');
 
             refreshIcon.classList.add('fa-spin');
@@ -426,25 +327,22 @@
             contentEl.style.pointerEvents = 'none';
 
             try {
-                // Cache-busting para que siempre traiga datos frescos
                 const url = SHEET_URL + '&t=' + Date.now();
                 const response = await fetch(url);
-
                 if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
                 const csvText = await response.text();
-                if (!csvText || csvText.trim().length === 0) throw new Error('La respuesta del servidor está vacía');
+                if (!csvText.trim()) throw new Error('La respuesta del servidor está vacía');
 
                 const data = parseCSV(csvText);
                 allData = data;
                 processData(data);
-
                 document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR');
                 errorEl.classList.add('hidden');
 
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-                document.getElementById('error-message').textContent = error.message;
+            } catch (err) {
+                console.error('Error:', err);
+                document.getElementById('error-message').textContent = err.message;
                 errorEl.classList.remove('hidden');
             } finally {
                 loadingEl.classList.add('hidden');
@@ -456,16 +354,15 @@
         }
 
         // ============================================================
-        // Procesamiento y renderizado
+        // Procesar y renderizar
         // ============================================================
         function processData(data) {
-            // KPIs
             document.getElementById('kpi-total').textContent    = data.length;
             document.getElementById('kpi-stores').textContent   = new Set(data.map(d => d.tienda)).size;
             document.getElementById('kpi-products').textContent = new Set(data.map(d => d.producto)).size;
 
-            const avgDiff = data.reduce((acc, d) => acc + d.porcentaje, 0) / data.length;
-            document.getElementById('kpi-diff').textContent = avgDiff.toFixed(1) + '%';
+            const avg = data.reduce((s, d) => s + d.porcentaje, 0) / data.length;
+            document.getElementById('kpi-diff').textContent = avg.toFixed(1) + '%';
 
             const critical = data.filter(d => d.porcentaje > 20).length;
             const medium   = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length;
@@ -475,39 +372,36 @@
             document.getElementById('count-medium').textContent   = medium;
             document.getElementById('count-low').textContent      = low;
 
-            // Chart: Top tiendas
+            // Chart tiendas
             const storeCounts = {};
             data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
-            const topStores = Object.entries(storeCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-
+            const topStores = Object.entries(storeCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
             updateChart('storesChart', 'bar', {
-                labels: topStores.map(s => s[0].length > 18 ? s[0].substring(0, 16) + '…' : s[0]),
+                labels: topStores.map(s => s[0].length > 18 ? s[0].slice(0,16)+'…' : s[0]),
                 datasets: [{ data: topStores.map(s => s[1]), backgroundColor: '#3b82f6', borderRadius: 6 }]
             }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
-            // Chart: Top productos
-            const productCounts = {};
-            data.forEach(d => { productCounts[d.producto] = (productCounts[d.producto] || 0) + 1; });
-            const topProducts = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-
+            // Chart productos
+            const prodCounts = {};
+            data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
+            const topProds = Object.entries(prodCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
             updateChart('productsChart', 'bar', {
-                labels: topProducts.map(p => p[0].length > 22 ? p[0].substring(0, 20) + '…' : p[0]),
-                datasets: [{ data: topProducts.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
+                labels: topProds.map(p => p[0].length > 22 ? p[0].slice(0,20)+'…' : p[0]),
+                datasets: [{ data: topProds.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
             }, { plugins: { legend: { display: false } } });
 
-            // Chart: Severidad
+            // Chart severidad
             updateChart('severityChart', 'doughnut', {
                 labels: ['Crítico', 'Medio', 'Bajo'],
-                datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth: 0 }]
+                datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444','#f59e0b','#10b981'], borderWidth: 0 }]
             }, { cutout: '70%', plugins: { legend: { display: false } } });
 
             // Alertas
-            const alertsContainer = document.getElementById('alerts-container');
-            alertsContainer.innerHTML = '';
-            const topAlerts = data.filter(d => d.porcentaje > 15).sort((a, b) => b.porcentaje - a.porcentaje).slice(0, 5);
-
+            const alertsEl = document.getElementById('alerts-container');
+            alertsEl.innerHTML = '';
+            const topAlerts = data.filter(d => d.porcentaje > 15).sort((a,b) => b.porcentaje-a.porcentaje).slice(0,5);
             if (topAlerts.length === 0) {
-                alertsContainer.innerHTML = '<p class="text-slate-500 text-sm">No hay alertas críticas activas.</p>';
+                alertsEl.innerHTML = '<p class="text-slate-500 text-sm">No hay alertas críticas activas.</p>';
             } else {
                 topAlerts.forEach(c => {
                     const div = document.createElement('div');
@@ -518,11 +412,12 @@
                             <p class="text-sm font-medium text-white truncate">${c.tienda}</p>
                             <p class="text-xs text-slate-400 truncate">${c.producto}</p>
                         </div>
-                        <div class="text-right flex-shrink-0">
+                        <div class="text-right flex-shrink-0 flex items-center gap-2">
                             <p class="text-sm font-bold ${c.porcentaje > 20 ? 'text-red-400' : 'text-amber-400'}">-${c.porcentaje.toFixed(1)}%</p>
+                            ${c.link ? `<a href="${c.link}" target="_blank" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : ''}
                         </div>
                     `;
-                    alertsContainer.appendChild(div);
+                    alertsEl.appendChild(div);
                 });
             }
 
@@ -532,25 +427,17 @@
         function updateChart(canvasId, type, data, options) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (charts[canvasId]) charts[canvasId].destroy();
-
             const isCartesian = type !== 'doughnut' && type !== 'pie';
-            const scaleConfig = isCartesian ? {
-                x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-            } : {};
-
             charts[canvasId] = new Chart(ctx, {
-                type,
-                data,
+                type, data,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     ...options,
-                    scales: scaleConfig,
-                    plugins: {
-                        ...(options.plugins || {}),
-                        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x ?? ctx.parsed.y ?? ctx.parsed} infracciones` } }
-                    }
+                    scales: isCartesian ? {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    } : {}
                 }
             });
         }
@@ -560,7 +447,7 @@
             tbody.innerHTML = '';
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">No hay resultados para los filtros aplicados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">No hay resultados.</td></tr>';
                 return;
             }
 
@@ -568,19 +455,28 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/50 transition-colors';
 
-                let severityClass = 'severity-low';
-                let severityText  = 'Baja';
-                if (row.porcentaje > 20)       { severityClass = 'severity-high';   severityText = 'Crítica'; }
-                else if (row.porcentaje >= 10) { severityClass = 'severity-medium'; severityText = 'Media'; }
+                let sClass = 'severity-low', sText = 'Baja';
+                if (row.porcentaje > 20)       { sClass = 'severity-high';   sText = 'Crítica'; }
+                else if (row.porcentaje >= 10) { sClass = 'severity-medium'; sText = 'Media'; }
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${row.tienda}</td>
                     <td class="px-6 py-4 text-slate-300 text-xs">${row.producto}</td>
                     <td class="px-6 py-4 text-right text-slate-300">$${row.precioMin.toLocaleString('es-AR')}</td>
                     <td class="px-6 py-4 text-right text-slate-300">$${row.precioVenta.toLocaleString('es-AR')}</td>
-                    <td class="px-6 py-4 text-right font-semibold text-red-400">-$${Math.abs(row.diferencia).toLocaleString('es-AR')} (${row.porcentaje.toFixed(1)}%)</td>
+                    <td class="px-6 py-4 text-right font-semibold text-red-400">
+                        -$${Math.abs(row.diferencia).toLocaleString('es-AR')} (${row.porcentaje.toFixed(1)}%)
+                    </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${severityClass}">${severityText}</span>
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${sClass}">${sText}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        ${row.link
+                            ? `<a href="${row.link}" target="_blank" rel="noopener" class="link-btn">
+                                <i class="fas fa-external-link-alt text-[10px]"></i> Ver
+                               </a>`
+                            : '<span class="text-slate-600 text-xs">—</span>'
+                        }
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -590,34 +486,28 @@
         function filterTable() {
             const search   = document.getElementById('search-input').value.toLowerCase();
             const severity = document.getElementById('filter-severity').value;
-
             const filtered = allData.filter(row => {
-                const matchesSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search);
-                let matchesSeverity = true;
-                if      (severity === 'high')   matchesSeverity = row.porcentaje > 20;
-                else if (severity === 'medium') matchesSeverity = row.porcentaje >= 10 && row.porcentaje <= 20;
-                else if (severity === 'low')    matchesSeverity = row.porcentaje < 10;
-                return matchesSearch && matchesSeverity;
+                const matchSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search);
+                let matchSev = true;
+                if      (severity === 'high')   matchSev = row.porcentaje > 20;
+                else if (severity === 'medium') matchSev = row.porcentaje >= 10 && row.porcentaje <= 20;
+                else if (severity === 'low')    matchSev = row.porcentaje < 10;
+                return matchSearch && matchSev;
             });
-
             renderTable(filtered);
         }
 
         function sortTable(column) {
             if (sortState.column === column) sortState.asc = !sortState.asc;
             else { sortState.column = column; sortState.asc = true; }
-
             allData.sort((a, b) => {
-                const valA = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column];
-                const valB = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column];
-                if (valA < valB) return sortState.asc ? -1 : 1;
-                if (valA > valB) return sortState.asc ? 1 : -1;
-                return 0;
+                const va = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column];
+                const vb = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column];
+                return sortState.asc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
             });
             filterTable();
         }
 
-        // Carga automática al iniciar
         window.addEventListener('load', loadData);
     </script>
 </body>
