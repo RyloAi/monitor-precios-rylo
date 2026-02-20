@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Precios - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hover-lift {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+        }
+        .severity-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .severity-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .severity-low { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Estilos para el logo */
+        .logo-container {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .logo-container:hover::before {
+            opacity: 1;
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased">
+    
+    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <!-- Logo Rylo -->
+                    <div class="logo-container">
+                        <!-- OPCIÓN A: Logo local (recomendado) -->
+                        <img src="logo-rylo.png" alt="Rylo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        
+                        <!-- OPCIÓN B: Fallback si no carga el logo -->
+                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; color: #60a5fa; font-weight: bold; font-size: 20px;">
+                            R
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-bold text-xl text-white tracking-tight">Monitor de Precios</h1>
+                            <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Rylo</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Control de infractores - Mercado Libre</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="loadData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 hover:shadow-blue-600/40 active:scale-95">
+                        <i class="fas fa-sync-alt" id="refresh-icon"></i>
+                        <span class="hidden sm:inline">Actualizar Datos</span>
+                    </button>
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs text-slate-400">Última actualización</p>
+                        <p class="text-sm font-medium text-white font-mono" id="last-update">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-slate-400">Cargando datos desde Google Sheets...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden glass-panel rounded-2xl p-8 text-center border border-red-500/30">
+            <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+            <h3 class="text-lg font-semibold text-white mb-2">Error al cargar datos</h3>
+            <p class="text-slate-400 mb-4">No se pudieron obtener los datos del Google Sheet. Verificá que el enlace CSV sea correcto.</p>
+            <button onclick="loadData()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
+                Reintentar
+            </button>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" class="space-y-6">
+            
+            <!-- KPIs Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Total Infracciones</p>
+                            <h3 class="text-3xl font-bold text-white" id="kpi-total">0</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-500">registros activos</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Tiendas Infractoras</p>
+                            <h3 class="text-3xl font-bold text-white" id="kpi-stores">0</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-store text-orange-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-500">vendedores únicos</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Productos Afectados</p>
+                            <h3 class="text-3xl font-bold text-white" id="kpi-products">0</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-box text-amber-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-500">diferentes SKU</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Diferencia Promedio</p>
+                            <h3 class="text-3xl font-bold text-white" id="kpi-diff">0%</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-percentage text-emerald-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-500">por debajo del mínimo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style="animation-delay: 0.1s">
+                <!-- Top Tiendas -->
+                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+                    <h3 class="text-lg font-semibold text-white mb-4">Top 10 Tiendas Infractoras</h3>
+                    <p class="text-sm text-slate-400 mb-4">Por cantidad de infracciones</p>
+                    <div class="h-64">
+                        <canvas id="storesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Productos -->
+                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+                    <h3 class="text-lg font-semibold text-white mb-4">Productos Más Infringidos</h3>
+                    <p class="text-sm text-slate-400 mb-4">Por volumen de infracciones</p>
+                    <div class="h-64">
+                        <canvas id="productsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Severidad y Distribución -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style="animation-delay: 0.2s">
+                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+                    <h3 class="text-lg font-semibold text-white mb-4">Distribución por Severidad</h3>
+                    <div class="h-48 relative flex items-center justify-center">
+                        <canvas id="severityChart"></canvas>
+                    </div>
+                    <div class="mt-4 space-y-2 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Crítico (>20%)</span>
+                            <span class="font-semibold text-white" id="count-critical">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Medio (10-20%)</span>
+                            <span class="font-semibold text-white" id="count-medium">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Bajo (<10%)</span>
+                            <span class="font-semibold text-white" id="count-low">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-700/50">
+                    <h3 class="text-lg font-semibold text-white mb-4">Alertas Recientes</h3>
+                    <div class="space-y-3 max-h-64 overflow-y-auto" id="alerts-container">
+                        <!-- Alertas generadas dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Detallada -->
+            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/50 fade-in" style="animation-delay: 0.3s">
+                <div class="p-6 border-b border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white">Detalle de Infracciones</h3>
+                        <p class="text-sm text-slate-400">Listado completo de tiendas y productos</p>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..." 
+                               class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64"
+                               onkeyup="filterTable()">
+                        <select id="filter-severity" onchange="filterTable()" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="all">Todas</option>
+                            <option value="high">Críticas</option>
+                            <option value="medium">Medias</option>
+                            <option value="low">Bajas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/80 text-slate-400 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('tienda')">Tienda <i class="fas fa-sort ml-1"></i></th>
+                                <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('producto')">Producto <i class="fas fa-sort ml-1"></i></th>
+                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioMin')">Precio Mín <i class="fas fa-sort ml-1"></i></th>
+                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioVenta')">Precio Venta <i class="fas fa-sort ml-1"></i></th>
+                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('diferencia')">Diferencia <i class="fas fa-sort ml-1"></i></th>
+                                <th class="px-6 py-3 font-medium text-center">Severidad</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800" id="table-body">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // URL del Google Sheet publicado como CSV
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?output=csv';
+        
+        let allData = [];
+        let charts = {};
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = [];
+                let inQuotes = false;
+                let currentValue = '';
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim().replace(/"/g, ''));
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim().replace(/"/g, ''));
+                
+                if (values.length >= headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+
+        async function loadData() {
+            const loadingEl = document.getElementById('loading-state');
+            const errorEl = document.getElementById('error-state');
+            const contentEl = document.getElementById('dashboard-content');
+            const refreshIcon = document.getElementById('refresh-icon');
+            
+            // Animar icono de refresh
+            refreshIcon.classList.add('fa-spin');
+            
+            loadingEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            contentEl.classList.add('opacity-50');
+            
+            try {
+                // Simulación de datos de ejemplo
+                const mockData = [
+                    { Tienda: 'ARGENTINNABEAUTYSTORE', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'AROMAINTENSO', Producto: 'HMB Ultra Concentrated 60 Caps', 'Precio Mínimo': '15058', 'Precio Venta': '15057', 'Diferencia ($)': '-1', '% Por Debajo': '-0.000066' },
+                    { Tienda: 'CAPSULESUPLEMENTOS', Producto: 'Whey Protein 2lbs Vainilla Gourmet', 'Precio Mínimo': '62253', 'Precio Venta': '57999', 'Diferencia ($)': '-4254', '% Por Debajo': '-0.0683' },
+                    { Tienda: 'CARMENREQUENAVALDERREY', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '35000', 'Diferencia ($)': '-16909', '% Por Debajo': '-0.3257' },
+                    { Tienda: 'DISFIT', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'DYD SUPLEMENTOS', Producto: 'Whey Protein 2lb Outlet Sin Sabor', 'Precio Mínimo': '51909', 'Precio Venta': '48879', 'Diferencia ($)': '-3029', '% Por Debajo': '-0.0583' },
+                    { Tienda: 'ECOMODICO', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'EDGEHOG_SUPLEMENTOS', Producto: 'Whey Protein 2lbs Vainilla Gourmet', 'Precio Mínimo': '62253', 'Precio Venta': '57810', 'Diferencia ($)': '-4443', '% Por Debajo': '-0.0713' },
+                    { Tienda: 'EPN STORE', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'FARMANOI', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '43568', 'Diferencia ($)': '-8340', '% Por Debajo': '-0.1606' },
+                    { Tienda: 'FITBUNNY', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'FREYAFITNESS', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'MORASHOP.AR', Producto: 'ZMA 60 Caps', 'Precio Mínimo': '17375', 'Precio Venta': '13200', 'Diferencia ($)': '-4175', '% Por Debajo': '-0.2402' },
+                    { Tienda: 'MUSCLEMARKET', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'NOGALSUPLEMENTOS', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'SUPLEMENTOSNORT', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42471', 'Diferencia ($)': '-9438', '% Por Debajo': '-0.1818' },
+                    { Tienda: 'SUPLEMENTOSOUTLET', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '42475', 'Diferencia ($)': '-9434', '% Por Debajo': '-0.1817' },
+                    { Tienda: 'THEMUSCLESTORE', Producto: 'Vegetal Protein Isolate 2lbs Vainilla', 'Precio Mínimo': '51909', 'Precio Venta': '43111', 'Diferencia ($)': '-8797', '% Por Debajo': '-0.1694' },
+                    { Tienda: 'TIENDARUNNER_AR', Producto: 'Vegetal Protein Isolate 2lb Neutro', 'Precio Mínimo': '42471', 'Precio Venta': '42400', 'Diferencia ($)': '-71', '% Por Debajo': '-0.0016' },
+                    { Tienda: 'TVASUPLEMENTS', Producto: 'Whey Protein 2lbs Vainilla Gourmet', 'Precio Mínimo': '62253', 'Precio Venta': '55900', 'Diferencia ($)': '-6353', '% Por Debajo': '-0.1020' }
+                ];
+                
+                const data = mockData.map(row => ({
+                    tienda: row.Tienda,
+                    producto: row.Producto,
+                    precioMin: parseFloat(row['Precio Mínimo']) || 0,
+                    precioVenta: parseFloat(row['Precio Venta']) || 0,
+                    diferencia: parseFloat(row['Diferencia ($)']) || 0,
+                    porcentaje: Math.abs(parseFloat(row['% Por Debajo']) || 0) * 100
+                }));
+                
+                allData = data;
+                processData(data);
+                
+                document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR');
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('opacity-50');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                contentEl.classList.add('hidden');
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function processData(data) {
+            document.getElementById('kpi-total').textContent = data.length;
+            
+            const uniqueStores = new Set(data.map(d => d.tienda)).size;
+            document.getElementById('kpi-stores').textContent = uniqueStores;
+            
+            const uniqueProducts = new Set(data.map(d => d.producto)).size;
+            document.getElementById('kpi-products').textContent = uniqueProducts;
+            
+            const avgDiff = data.reduce((acc, d) => acc + d.porcentaje, 0) / data.length;
+            document.getElementById('kpi-diff').textContent = avgDiff.toFixed(1) + '%';
+            
+            const critical = data.filter(d => d.porcentaje > 20).length;
+            const medium = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length;
+            const low = data.filter(d => d.porcentaje < 10).length;
+            
+            document.getElementById('count-critical').textContent = critical;
+            document.getElementById('count-medium').textContent = medium;
+            document.getElementById('count-low').textContent = low;
+            
+            const storeCounts = {};
+            data.forEach(d => {
+                storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1;
+            });
+            const topStores = Object.entries(storeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            updateChart('storesChart', 'bar', {
+                labels: topStores.map(s => s[0].substring(0, 15) + '...'),
+                datasets: [{
+                    data: topStores.map(s => s[1]),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                }]
+            }, {
+                indexAxis: 'y',
+                plugins: { legend: { display: false } }
+            });
+            
+            const productCounts = {};
+            data.forEach(d => {
+                productCounts[d.producto] = (productCounts[d.producto] || 0) + 1;
+            });
+            const topProducts = Object.entries(productCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+            
+            updateChart('productsChart', 'bar', {
+                labels: topProducts.map(p => p[0].substring(0, 20) + '...'),
+                datasets: [{
+                    data: topProducts.map(p => p[1]),
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 6
+                }]
+            }, {
+                plugins: { legend: { display: false } }
+            });
+            
+            updateChart('severityChart', 'doughnut', {
+                labels: ['Crítico', 'Medio', 'Bajo'],
+                datasets: [{
+                    data: [critical, medium, low],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                    borderWidth: 0
+                }]
+            }, {
+                cutout: '70%',
+                plugins: { legend: { display: false } }
+            });
+            
+            const alertsContainer = document.getElementById('alerts-container');
+            alertsContainer.innerHTML = '';
+            const criticalCases = data
+                .filter(d => d.porcentaje > 15)
+                .sort((a, b) => b.porcentaje - a.porcentaje)
+                .slice(0, 5);
+            
+            criticalCases.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700';
+                div.innerHTML = `
+                    <div class="w-2 h-2 rounded-full ${c.porcentaje > 20 ? 'bg-red-500' : 'bg-amber-500'}"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">${c.tienda}</p>
+                        <p class="text-xs text-slate-400 truncate">${c.producto}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold ${c.porcentaje > 20 ? 'text-red-400' : 'text-amber-400'}">-${c.porcentaje.toFixed(1)}%</p>
+                    </div>
+                `;
+                alertsContainer.appendChild(div);
+            });
+            
+            renderTable(data);
+        }
+
+        function updateChart(canvasId, type, data, options) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            
+            charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...options,
+                    scales: {
+                        x: { 
+                            grid: { display: false, color: '#334155' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        y: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/50 transition-colors';
+                
+                let severityClass = 'severity-low';
+                let severityText = 'Baja';
+                if (row.porcentaje > 20) {
+                    severityClass = 'severity-high';
+                    severityText = 'Crítica';
+                } else if (row.porcentaje >= 10) {
+                    severityClass = 'severity-medium';
+                    severityText = 'Media';
+                }
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${row.tienda}</td>
+                    <td class="px-6 py-4 text-slate-300 text-xs">${row.producto}</td>
+                    <td class="px-6 py-4 text-right text-slate-300">$${row.precioMin.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-right text-slate-300">$${row.precioVenta.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-right font-semibold text-red-400">-$${Math.abs(row.diferencia).toLocaleString()} (${row.porcentaje.toFixed(1)}%)</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${severityClass}">${severityText}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const severity = document.getElementById('filter-severity').value;
+            
+            let filtered = allData.filter(row => {
+                const matchesSearch = row.tienda.toLowerCase().includes(search) || 
+                                    row.producto.toLowerCase().includes(search);
+                
+                let matchesSeverity = true;
+                if (severity === 'high') matchesSeverity = row.porcentaje > 20;
+                else if (severity === 'medium') matchesSeverity = row.porcentaje >= 10 && row.porcentaje <= 20;
+                else if (severity === 'low') matchesSeverity = row.porcentaje < 10;
+                
+                return matchesSearch && matchesSeverity;
+            });
+            
+            renderTable(filtered);
+        }
+
+        function sortTable(column) {
+            console.log('Sort by:', column);
+        }
+
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
