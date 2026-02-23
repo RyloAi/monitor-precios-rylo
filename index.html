@@ -33,59 +33,28 @@
         .link-btn:hover { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.6); }
 
         /* Modal Export */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-            z-index: 100; display: none; align-items: center; justify-content: center;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
-            padding: 32px; width: 90%; max-width: 460px; position: relative;
-            box-shadow: 0 25px 60px -12px rgba(0,0,0,0.5);
-            animation: modalIn 0.25s ease-out;
-        }
+        .modal-box { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; width: 90%; max-width: 460px; position: relative; box-shadow: 0 25px 60px -12px rgba(0,0,0,0.5); animation: modalIn 0.25s ease-out; }
         @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-        .modal-close {
-            position: absolute; top: 16px; right: 16px; background: none; border: none;
-            color: #64748b; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
-            transition: all 0.15s;
-        }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.15s; }
         .modal-close:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
-
-        .period-btn {
-            flex: 1; padding: 16px 12px; background: #0f172a; border: 2px solid #334155;
-            border-radius: 12px; color: #94a3b8; font-family: 'Inter', sans-serif;
-            font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center;
-        }
+        .period-btn { flex: 1; padding: 16px 12px; background: #0f172a; border: 2px solid #334155; border-radius: 12px; color: #94a3b8; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
         .period-btn:hover { border-color: #3b82f6; color: #e2e8f0; }
         .period-btn.active { border-color: #3b82f6; color: #fff; background: rgba(59,130,246,0.15); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
-        .period-btn .days { font-size: 28px; font-weight: 700; display: block; font-family: 'Inter', sans-serif; }
+        .period-btn .days { font-size: 28px; font-weight: 700; display: block; }
         .period-btn .label { font-size: 11px; font-weight: 500; opacity: 0.7; }
-
         .sheet-check { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
         .sheet-check:hover { border-color: rgba(59,130,246,0.4); }
-        .sheet-check input[type="checkbox"] {
-            appearance: none; width: 18px; height: 18px; border: 2px solid #475569; border-radius: 5px;
-            cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.15s;
-        }
+        .sheet-check input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid #475569; border-radius: 5px; cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.15s; }
         .sheet-check input:checked { background: #3b82f6; border-color: #3b82f6; }
         .sheet-check input:checked::after { content: '\2713'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 11px; font-weight: 700; }
         .sheet-check .s-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
         .sheet-check .s-desc { font-size: 11px; color: #64748b; }
-
-        .export-go {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;
-            border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px;
-            font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center;
-            justify-content: center; gap: 8px;
-        }
+        .export-go { width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .export-go:hover { box-shadow: 0 8px 25px rgba(59,130,246,0.3); transform: translateY(-1px); }
         .export-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .export-status {
-            text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 500;
-            margin-top: 12px; display: none;
-        }
+        .export-status { text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 500; margin-top: 12px; display: none; }
         .export-status.ok { display: block; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
         .export-status.err { display: block; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
     </style>
@@ -96,38 +65,28 @@
     <div class="modal-overlay" id="exportModal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeExportModal()">&times;</button>
-
             <h2 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Exportar Reporte</h2>
             <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Descargá un Excel con el detalle de infracciones</p>
-
-            <!-- Período -->
             <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Período</p>
             <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button class="period-btn active" onclick="setExportPeriod(30, this)">
-                    <span class="days">30</span><span class="label">días</span>
-                </button>
-                <button class="period-btn" onclick="setExportPeriod(60, this)">
-                    <span class="days">60</span><span class="label">días</span>
-                </button>
+                <button class="period-btn active" onclick="setExportPeriod(30, this)"><span class="days">30</span><span class="label">días</span></button>
+                <button class="period-btn" onclick="setExportPeriod(60, this)"><span class="days">60</span><span class="label">días</span></button>
             </div>
-
-            <!-- Hojas -->
             <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Hojas del Excel</p>
             <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
                 <label class="sheet-check">
                     <input type="checkbox" id="expInfractores" checked>
-                    <div><div class="s-name">🚨 Infractores</div><div class="s-desc">Todas las infracciones con precio, seller y link</div></div>
+                    <div><div class="s-name">🚨 Infractores</div><div class="s-desc">Una fila por publicación única con precio actual y estado</div></div>
                 </label>
                 <label class="sheet-check">
                     <input type="checkbox" id="expEvolucion" checked>
-                    <div><div class="s-name">📈 Evolución de Precios</div><div class="s-desc">Cambios de precio por seller entre escaneos</div></div>
+                    <div><div class="s-name">📈 Evolución de Precios</div><div class="s-desc">Solo registra cuando el precio cambió (sube o baja)</div></div>
                 </label>
                 <label class="sheet-check">
                     <input type="checkbox" id="expResumen" checked>
                     <div><div class="s-name">📊 Resumen por Producto</div><div class="s-desc">Totales de infracciones y sellers por producto</div></div>
                 </label>
             </div>
-
             <button class="export-go" id="exportGoBtn" onclick="generarExcel()">
                 <i class="fas fa-file-excel"></i>
                 <span id="exportGoText">Descargar Excel</span>
@@ -141,8 +100,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="logo-container">
-                        <img src="logo-rylo.png" alt="Rylo" class="logo-img"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="logo-rylo.png" alt="Rylo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="logo-fallback">R</div>
                     </div>
                     <div>
@@ -172,12 +130,10 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
-
         <div id="loading-state" class="hidden flex-col items-center justify-center py-20">
             <div class="loading-spinner mb-4"></div>
             <p class="text-slate-400">Cargando datos desde Google Sheets...</p>
         </div>
-
         <div id="error-state" class="hidden glass-panel rounded-2xl p-8 text-center border border-red-500/30">
             <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
             <h3 class="text-lg font-semibold text-white mb-2">Error al cargar datos</h3>
@@ -185,143 +141,61 @@
             <p class="text-slate-500 text-xs mb-4">Verificá que el Sheet esté publicado: Archivo → Compartir → Publicar en la web → Hoja "Data" → CSV</p>
             <button onclick="loadData()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">Reintentar</button>
         </div>
-
         <div id="dashboard-content" class="space-y-6">
-
             <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-slate-400 text-sm font-medium mb-1">Total Infracciones</p>
-                            <h3 class="text-3xl font-bold text-white" id="kpi-total">--</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-exclamation-circle text-red-400"></i>
-                        </div>
-                    </div>
-                    <span class="text-slate-500 text-sm">registros activos</span>
-                </div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-slate-400 text-sm font-medium mb-1">Tiendas Infractoras</p>
-                            <h3 class="text-3xl font-bold text-white" id="kpi-stores">--</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-store text-orange-400"></i>
-                        </div>
-                    </div>
-                    <span class="text-slate-500 text-sm">vendedores únicos</span>
-                </div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-slate-400 text-sm font-medium mb-1">Productos Afectados</p>
-                            <h3 class="text-3xl font-bold text-white" id="kpi-products">--</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-box text-amber-400"></i>
-                        </div>
-                    </div>
-                    <span class="text-slate-500 text-sm">diferentes SKU</span>
-                </div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-slate-400 text-sm font-medium mb-1">Diferencia Promedio</p>
-                            <h3 class="text-3xl font-bold text-white" id="kpi-diff">--%</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-percentage text-emerald-400"></i>
-                        </div>
-                    </div>
-                    <span class="text-slate-500 text-sm">por debajo del mínimo</span>
-                </div>
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Total Infracciones</p><h3 class="text-3xl font-bold text-white" id="kpi-total">--</h3></div><div class="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-400"></i></div></div><span class="text-slate-500 text-sm">registros activos</span></div>
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Tiendas Infractoras</p><h3 class="text-3xl font-bold text-white" id="kpi-stores">--</h3></div><div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center"><i class="fas fa-store text-orange-400"></i></div></div><span class="text-slate-500 text-sm">vendedores únicos</span></div>
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Productos Afectados</p><h3 class="text-3xl font-bold text-white" id="kpi-products">--</h3></div><div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-box text-amber-400"></i></div></div><span class="text-slate-500 text-sm">diferentes SKU</span></div>
+                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Diferencia Promedio</p><h3 class="text-3xl font-bold text-white" id="kpi-diff">--%</h3></div><div class="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center"><i class="fas fa-percentage text-emerald-400"></i></div></div><span class="text-slate-500 text-sm">por debajo del mínimo</span></div>
             </div>
-
             <!-- Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style="animation-delay:0.1s">
-                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
-                    <h3 class="text-lg font-semibold text-white mb-1">Top 10 Tiendas Infractoras</h3>
-                    <p class="text-sm text-slate-400 mb-4">Por cantidad de infracciones</p>
-                    <div class="h-64"><canvas id="storesChart"></canvas></div>
-                </div>
-                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
-                    <h3 class="text-lg font-semibold text-white mb-1">Productos Más Infringidos</h3>
-                    <p class="text-sm text-slate-400 mb-4">Por volumen de infracciones</p>
-                    <div class="h-64"><canvas id="productsChart"></canvas></div>
-                </div>
+                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50"><h3 class="text-lg font-semibold text-white mb-1">Top 10 Tiendas Infractoras</h3><p class="text-sm text-slate-400 mb-4">Por cantidad de infracciones</p><div class="h-64"><canvas id="storesChart"></canvas></div></div>
+                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50"><h3 class="text-lg font-semibold text-white mb-1">Productos Más Infringidos</h3><p class="text-sm text-slate-400 mb-4">Por volumen de infracciones</p><div class="h-64"><canvas id="productsChart"></canvas></div></div>
             </div>
-
             <!-- Severidad + Alertas -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style="animation-delay:0.2s">
                 <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-4">Distribución por Severidad</h3>
-                    <div class="h-48 flex items-center justify-center">
-                        <canvas id="severityChart"></canvas>
-                    </div>
+                    <div class="h-48 flex items-center justify-center"><canvas id="severityChart"></canvas></div>
                     <div class="mt-4 space-y-2 text-sm">
-                        <div class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Crítico (&gt;20%)</span>
-                            <span class="font-semibold text-white" id="count-critical">0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Medio (10-20%)</span>
-                            <span class="font-semibold text-white" id="count-medium">0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Bajo (&lt;10%)</span>
-                            <span class="font-semibold text-white" id="count-low">0</span>
-                        </div>
+                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Crítico (&gt;20%)</span><span class="font-semibold text-white" id="count-critical">0</span></div>
+                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Medio (10-20%)</span><span class="font-semibold text-white" id="count-medium">0</span></div>
+                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Bajo (&lt;10%)</span><span class="font-semibold text-white" id="count-low">0</span></div>
                     </div>
                 </div>
                 <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-700/50">
                     <h3 class="text-lg font-semibold text-white mb-4">Alertas Críticas</h3>
-                    <div class="space-y-3 max-h-64 overflow-y-auto" id="alerts-container">
-                        <p class="text-slate-500 text-sm">Cargando...</p>
-                    </div>
+                    <div class="space-y-3 max-h-64 overflow-y-auto" id="alerts-container"><p class="text-slate-500 text-sm">Cargando...</p></div>
                 </div>
             </div>
-
             <!-- Tabla -->
             <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/50 fade-in" style="animation-delay:0.3s">
                 <div class="p-6 border-b border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-white">Detalle de Infracciones</h3>
-                        <p class="text-sm text-slate-400">Listado completo · click en "Ver" para abrir la publicación</p>
-                    </div>
+                    <div><h3 class="text-lg font-semibold text-white">Detalle de Infracciones</h3><p class="text-sm text-slate-400">Listado completo · click en "Ver" para abrir la publicación</p></div>
                     <div class="flex gap-2 w-full md:w-auto">
-                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..."
-                               class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64"
-                               onkeyup="filterTable()">
-                        <select id="filter-severity" onchange="filterTable()"
-                                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
-                            <option value="all">Todas</option>
-                            <option value="high">Críticas</option>
-                            <option value="medium">Medias</option>
-                            <option value="low">Bajas</option>
+                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..." class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64" onkeyup="filterTable()">
+                        <select id="filter-severity" onchange="filterTable()" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="all">Todas</option><option value="high">Críticas</option><option value="medium">Medias</option><option value="low">Bajas</option>
                         </select>
                     </div>
                 </div>
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-800/80 text-slate-400 sticky top-0 z-10">
-                            <tr>
-                                <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('tienda')">Tienda <i class="fas fa-sort ml-1"></i></th>
-                                <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('producto')">Producto <i class="fas fa-sort ml-1"></i></th>
-                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioMin')">Precio Mín <i class="fas fa-sort ml-1"></i></th>
-                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioVenta')">Precio Venta <i class="fas fa-sort ml-1"></i></th>
-                                <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('diferencia')">Diferencia <i class="fas fa-sort ml-1"></i></th>
-                                <th class="px-6 py-3 font-medium text-center">Severidad</th>
-                                <th class="px-6 py-3 font-medium text-center">Publicación</th>
-                            </tr>
-                        </thead>
+                        <thead class="bg-slate-800/80 text-slate-400 sticky top-0 z-10"><tr>
+                            <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('tienda')">Tienda <i class="fas fa-sort ml-1"></i></th>
+                            <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('producto')">Producto <i class="fas fa-sort ml-1"></i></th>
+                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioMin')">Precio Mín <i class="fas fa-sort ml-1"></i></th>
+                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioVenta')">Precio Venta <i class="fas fa-sort ml-1"></i></th>
+                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('diferencia')">Diferencia <i class="fas fa-sort ml-1"></i></th>
+                            <th class="px-6 py-3 font-medium text-center">Severidad</th>
+                            <th class="px-6 py-3 font-medium text-center">Publicación</th>
+                        </tr></thead>
                         <tbody class="divide-y divide-slate-800" id="table-body"></tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -330,8 +204,6 @@
         // CONFIGURACION
         // ============================================================
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
-
-        // Supabase (para reporte historico)
         const SUPABASE_URL = 'https://zqkmfrqgexwhyujhncqg.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa21mcnFnZXh3aHl1amhuY3FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY4NTEsImV4cCI6MjA4NTk3Mjg1MX0.lL3_DGCMNrCyvCoVinGTqVDZRcRj1y9rzFSEFMOrqOc';
 
@@ -349,31 +221,20 @@
             document.getElementById('exportStatus').className = 'export-status';
             document.getElementById('exportStatus').style.display = 'none';
         }
-
-        function closeExportModal() {
-            document.getElementById('exportModal').classList.remove('active');
-        }
-
+        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
         function setExportPeriod(dias, btn) {
             exportDias = dias;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
-
-        document.getElementById('exportModal').addEventListener('click', function(e) {
-            if (e.target === this) closeExportModal();
-        });
+        document.getElementById('exportModal').addEventListener('click', function(e) { if (e.target === this) closeExportModal(); });
 
         // ============================================================
         // SUPABASE HELPER
         // ============================================================
         async function supaFetch(table, query) {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
             });
             if (!res.ok) throw new Error(`Supabase error ${res.status} en ${table}`);
             return res.json();
@@ -381,15 +242,12 @@
 
         function formatFechaAR(iso) {
             if (!iso) return '';
-            return new Date(iso).toLocaleString('es-AR', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-                timeZone: 'America/Argentina/Buenos_Aires'
-            });
+            return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
         }
 
         // ============================================================
-        // GENERAR EXCEL
+        // GENERAR EXCEL - LOGICA CORREGIDA
+        // Publicaciones unicas + solo cambios de precio
         // ============================================================
         async function generarExcel() {
             const btn = document.getElementById('exportGoBtn');
@@ -402,15 +260,13 @@
                 const desde = new Date();
                 desde.setDate(desde.getDate() - exportDias);
                 const desdeISO = desde.toISOString();
-
                 const wb = XLSX.utils.book_new();
 
                 // --- Obtener escaneos del periodo (paginado) ---
                 let allEscaneos = [];
                 let escOffset = 0;
                 while (true) {
-                    const batch = await supaFetch('escaneos',
-                        `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc&limit=1000&offset=${escOffset}`);
+                    const batch = await supaFetch('escaneos', `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc&limit=1000&offset=${escOffset}`);
                     allEscaneos = allEscaneos.concat(batch);
                     if (batch.length < 1000) break;
                     escOffset += 1000;
@@ -419,157 +275,181 @@
                 if (allEscaneos.length === 0) {
                     // Fallback: exportar datos del dashboard actual
                     if (document.getElementById('expInfractores').checked) {
-                        const rows = allData.map(d => ({
-                            'Tienda': d.tienda,
-                            'Producto': d.producto,
-                            'Precio Mínimo': d.precioMin,
-                            'Precio Venta': d.precioVenta,
-                            'Diferencia $': d.diferencia,
-                            'Diferencia %': d.porcentaje.toFixed(1) + '%',
-                            'Link': d.link
-                        }));
+                        const rows = allData.map(d => ({ 'Tienda': d.tienda, 'Producto': d.producto, 'Precio Mínimo': d.precioMin, 'Precio Venta': d.precioVenta, 'Diferencia $': d.diferencia, 'Diferencia %': d.porcentaje.toFixed(1) + '%', 'Link': d.link }));
                         const ws = XLSX.utils.json_to_sheet(rows);
                         ws['!cols'] = [{ wch:25 },{ wch:35 },{ wch:14 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:45 }];
                         XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
                     }
-                    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
-                    XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
+                    XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${new Date().toLocaleDateString('es-AR').replace(/\//g, '-')}.xlsx`);
                     statusEl.textContent = '✓ Excel descargado (datos del dashboard actual)';
                     statusEl.className = 'export-status ok';
                     return;
                 }
 
                 const escaneoIds = allEscaneos.map(e => e.id);
-
-                // Productos
                 const productos = await supaFetch('productos', 'select=id,nombre,precio_minimo,sku&activo=eq.true');
-                const prodMap = {};
-                productos.forEach(p => { prodMap[p.id] = p; });
+                const prodMap = {}; productos.forEach(p => { prodMap[p.id] = p; });
+                const escMap = {}; allEscaneos.forEach(e => { escMap[e.id] = e; });
 
-                // Escaneo map
-                const escMap = {};
-                allEscaneos.forEach(e => { escMap[e.id] = e; });
-
-                // ================================================
-                // Listados infractores - EN LOTES de 50 escaneos
-                // para no exceder el limite de largo de URL
-                // ================================================
+                // Listados infractores en lotes de 50
                 let allListados = [];
                 const BATCH_SIZE = 50;
-
                 for (let i = 0; i < escaneoIds.length; i += BATCH_SIZE) {
                     const batchIds = escaneoIds.slice(i, i + BATCH_SIZE);
                     let offset = 0;
-
                     while (true) {
-                        const results = await supaFetch('listados_ml',
-                            `select=*&es_infractor=eq.true&escaneo_id=in.(${batchIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
+                        const results = await supaFetch('listados_ml', `select=*&es_infractor=eq.true&escaneo_id=in.(${batchIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
                         allListados = allListados.concat(results);
                         if (results.length < 1000) break;
                         offset += 1000;
                     }
-
-                    // Actualizar progreso en el boton
                     const progreso = Math.min(100, Math.round(((i + BATCH_SIZE) / escaneoIds.length) * 100));
                     document.getElementById('exportGoText').textContent = `Cargando datos... ${progreso}%`;
                 }
 
-                document.getElementById('exportGoText').textContent = 'Generando Excel...';
+                document.getElementById('exportGoText').textContent = 'Procesando...';
 
-                // Enriquecer listados con datos de producto y fecha
+                // Enriquecer
                 const enriched = allListados.map(l => {
                     const esc = escMap[l.escaneo_id] || {};
                     const prod = prodMap[esc.producto_id] || {};
                     return { ...l, fecha_escaneo: esc.fecha, producto_nombre: prod.nombre, precio_minimo_prod: prod.precio_minimo };
                 });
 
-                // ========== HOJA 1: INFRACTORES ==========
+                // ================================================
+                // AGRUPAR POR PUBLICACION UNICA (item_id_ml)
+                // ================================================
+                const pubMap = {}; // key = item_id_ml
+                enriched.sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
+                    .forEach(l => {
+                        const key = l.item_id_ml;
+                        if (!pubMap[key]) {
+                            pubMap[key] = {
+                                item_id_ml: l.item_id_ml,
+                                seller: l.seller_nickname,
+                                seller_id: l.seller_id,
+                                producto: l.producto_nombre,
+                                precio_minimo: l.precio_minimo_prod,
+                                permalink: l.permalink,
+                                // Tracking
+                                primer_precio: l.precio,
+                                precio_actual: l.precio,
+                                precio_mas_bajo: l.precio,
+                                primera_deteccion: l.fecha_escaneo,
+                                ultima_deteccion: l.fecha_escaneo,
+                                veces_detectado: 0,
+                                // Historial de CAMBIOS (solo cuando cambia el precio)
+                                cambios: [{ fecha: l.fecha_escaneo, precio: l.precio }]
+                            };
+                        }
+                        const pub = pubMap[key];
+                        pub.veces_detectado++;
+                        pub.ultima_deteccion = l.fecha_escaneo;
+                        pub.precio_actual = l.precio;
+                        if (l.precio < pub.precio_mas_bajo) pub.precio_mas_bajo = l.precio;
+
+                        // Solo agregar al historial si el precio CAMBIO
+                        const ultimoCambio = pub.cambios[pub.cambios.length - 1];
+                        if (l.precio !== ultimoCambio.precio) {
+                            pub.cambios.push({ fecha: l.fecha_escaneo, precio: l.precio });
+                        }
+                    });
+
+                const publicaciones = Object.values(pubMap);
+
+                // ========== HOJA 1: INFRACTORES (1 fila por publicacion unica) ==========
                 if (document.getElementById('expInfractores').checked) {
-                    const rows = enriched.map(l => ({
-                        'Fecha': formatFechaAR(l.fecha_escaneo),
-                        'Producto': l.producto_nombre || '',
-                        'Precio Mínimo': l.precio_minimo_prod || '',
-                        'Seller': l.seller_nickname || '',
-                        'Seller ID': l.seller_id || '',
-                        'Publicación': l.item_id_ml || '',
-                        'Precio Venta': l.precio || '',
-                        'Diferencia %': l.diferencia_pct || '',
-                        'Link': l.permalink || ''
-                    }));
+                    const rows = publicaciones.map(p => {
+                        const diffPct = p.precio_minimo > 0 ? (((p.precio_actual - p.precio_minimo) / p.precio_minimo) * 100).toFixed(1) + '%' : '-';
+                        const tendencia = p.precio_actual < p.primer_precio ? '⬇ Bajó' : p.precio_actual > p.primer_precio ? '⬆ Subió' : '= Igual';
+                        return {
+                            'Publicación': p.item_id_ml,
+                            'Seller': p.seller,
+                            'Producto': p.producto || '',
+                            'Precio Mínimo': p.precio_minimo || '',
+                            'Precio Actual': p.precio_actual,
+                            'Precio Más Bajo': p.precio_mas_bajo,
+                            'Diferencia %': diffPct,
+                            'Primer Precio': p.primer_precio,
+                            'Tendencia': tendencia,
+                            'Cambios de Precio': p.cambios.length - 1,
+                            'Primera Detección': formatFechaAR(p.primera_deteccion),
+                            'Última Detección': formatFechaAR(p.ultima_deteccion),
+                            'Veces Detectado': p.veces_detectado,
+                            'Link': p.permalink || ''
+                        };
+                    });
+                    rows.sort((a, b) => a['Precio Actual'] - b['Precio Actual']);
                     const ws = XLSX.utils.json_to_sheet(rows);
-                    ws['!cols'] = [{ wch:18 },{ wch:35 },{ wch:14 },{ wch:25 },{ wch:12 },{ wch:16 },{ wch:14 },{ wch:12 },{ wch:45 }];
+                    ws['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:13 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:13 },{ wch:10 },{ wch:14 },{ wch:18 },{ wch:18 },{ wch:14 },{ wch:45 }];
                     XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
                 }
 
-                // ========== HOJA 2: EVOLUCION DE PRECIOS ==========
+                // ========== HOJA 2: EVOLUCION (solo cambios de precio) ==========
                 if (document.getElementById('expEvolucion').checked) {
-                    const hist = {};
-                    // Ordenar por fecha ascendente para calcular cambios
-                    [...enriched].sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
-                        .forEach(l => {
-                            const key = `${l.item_id_ml}_${l.seller_id}`;
-                            if (!hist[key]) hist[key] = { item: l.item_id_ml, seller: l.seller_nickname, producto: l.producto_nombre, regs: [] };
-                            hist[key].regs.push({ fecha: l.fecha_escaneo, precio: l.precio });
-                        });
-
                     const evoRows = [];
-                    Object.values(hist).forEach(h => {
-                        h.regs.forEach((r, i) => {
-                            const prev = i > 0 ? h.regs[i - 1] : null;
-                            const cambio = prev ? r.precio - prev.precio : 0;
+                    publicaciones.forEach(p => {
+                        // Solo incluir publicaciones que tuvieron al menos 1 cambio
+                        if (p.cambios.length <= 1) return;
+
+                        p.cambios.forEach((c, i) => {
+                            const prev = i > 0 ? p.cambios[i - 1] : null;
+                            const cambio = prev ? c.precio - prev.precio : 0;
                             evoRows.push({
-                                'Fecha': formatFechaAR(r.fecha),
-                                'Producto': h.producto,
-                                'Seller': h.seller,
-                                'Publicación': h.item,
-                                'Precio': r.precio,
-                                'Precio Anterior': prev ? prev.precio : '-',
-                                'Cambio $': cambio !== 0 ? cambio : '-',
-                                'Cambio %': prev && cambio !== 0 ? ((cambio / prev.precio) * 100).toFixed(1) + '%' : '-'
+                                'Publicación': p.item_id_ml,
+                                'Seller': p.seller,
+                                'Producto': p.producto,
+                                'Fecha del Cambio': formatFechaAR(c.fecha),
+                                'Precio': c.precio,
+                                'Precio Anterior': prev ? prev.precio : '(inicio)',
+                                'Cambio $': prev ? cambio : '-',
+                                'Cambio %': prev ? ((cambio / prev.precio) * 100).toFixed(1) + '%' : '-',
+                                'Dirección': !prev ? 'Inicio' : cambio < 0 ? '⬇ Bajó' : '⬆ Subió'
                             });
                         });
                     });
 
+                    if (evoRows.length === 0) {
+                        evoRows.push({ 'Publicación': 'Sin cambios de precio en el período', 'Seller': '', 'Producto': '', 'Fecha del Cambio': '', 'Precio': '', 'Precio Anterior': '', 'Cambio $': '', 'Cambio %': '', 'Dirección': '' });
+                    }
+
                     const ws2 = XLSX.utils.json_to_sheet(evoRows);
-                    ws2['!cols'] = [{ wch:18 },{ wch:35 },{ wch:25 },{ wch:16 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:10 }];
+                    ws2['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:18 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:10 },{ wch:10 }];
                     XLSX.utils.book_append_sheet(wb, ws2, 'Evolución Precios');
                 }
 
                 // ========== HOJA 3: RESUMEN POR PRODUCTO ==========
                 if (document.getElementById('expResumen').checked) {
                     const resumen = {};
-                    enriched.forEach(l => {
-                        const p = l.producto_nombre || 'Sin producto';
-                        if (!resumen[p]) resumen[p] = { producto: p, pm: l.precio_minimo_prod, cnt: 0, sellers: new Set(), low: Infinity, prices: [], first: l.fecha_escaneo, last: l.fecha_escaneo };
-                        resumen[p].cnt++;
-                        resumen[p].sellers.add(l.seller_id);
-                        if (l.precio < resumen[p].low) resumen[p].low = l.precio;
-                        resumen[p].prices.push(l.precio);
-                        if (new Date(l.fecha_escaneo) < new Date(resumen[p].first)) resumen[p].first = l.fecha_escaneo;
-                        if (new Date(l.fecha_escaneo) > new Date(resumen[p].last)) resumen[p].last = l.fecha_escaneo;
+                    publicaciones.forEach(p => {
+                        const prod = p.producto || 'Sin producto';
+                        if (!resumen[prod]) resumen[prod] = { producto: prod, pm: p.precio_minimo, pubs: 0, sellers: new Set(), low: Infinity, prices: [], conCambios: 0 };
+                        resumen[prod].pubs++;
+                        resumen[prod].sellers.add(p.seller_id);
+                        if (p.precio_mas_bajo < resumen[prod].low) resumen[prod].low = p.precio_mas_bajo;
+                        resumen[prod].prices.push(p.precio_actual);
+                        if (p.cambios.length > 1) resumen[prod].conCambios++;
                     });
 
                     const resRows = Object.values(resumen).map(r => ({
                         'Producto': r.producto,
                         'Precio Mínimo': r.pm,
-                        'Total Infracciones': r.cnt,
-                        'Sellers Infractores': r.sellers.size,
-                        'Precio Más Bajo': r.low === Infinity ? '-' : r.low,
-                        'Precio Promedio': Math.round(r.prices.reduce((a, b) => a + b, 0) / r.prices.length),
-                        'Primera Detección': formatFechaAR(r.first),
-                        'Última Detección': formatFechaAR(r.last)
+                        'Publicaciones Infractoras': r.pubs,
+                        'Sellers Únicos': r.sellers.size,
+                        'Precio Más Bajo Detectado': r.low === Infinity ? '-' : r.low,
+                        'Precio Promedio Actual': Math.round(r.prices.reduce((a, b) => a + b, 0) / r.prices.length),
+                        'Con Cambios de Precio': r.conCambios
                     }));
 
                     const ws3 = XLSX.utils.json_to_sheet(resRows);
-                    ws3['!cols'] = [{ wch:35 },{ wch:14 },{ wch:16 },{ wch:18 },{ wch:16 },{ wch:16 },{ wch:18 },{ wch:18 }];
+                    ws3['!cols'] = [{ wch:35 },{ wch:14 },{ wch:20 },{ wch:14 },{ wch:22 },{ wch:18 },{ wch:18 }];
                     XLSX.utils.book_append_sheet(wb, ws3, 'Resumen Productos');
                 }
 
                 // --- Descargar ---
                 const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
                 XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
-
-                statusEl.textContent = `✓ Reporte descargado — ${enriched.length} infracciones en ${exportDias} días`;
+                statusEl.textContent = `✓ Reporte descargado — ${publicaciones.length} publicaciones únicas en ${exportDias} días`;
                 statusEl.className = 'export-status ok';
 
             } catch (err) {
@@ -583,64 +463,30 @@
         }
 
         // ============================================================
-        // CSV Parser robusto
+        // CSV Parser
         // ============================================================
-        function cleanPrice(val) {
-            return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0;
-        }
+        function cleanPrice(val) { return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0; }
 
         function parseCSV(csvText) {
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) throw new Error('El CSV está vacío');
-
             const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-
-            const findIdx = (keywords, fallback) => {
-                const found = headers.findIndex(h => keywords.some(k => h.includes(k)));
-                return found !== -1 ? found : fallback;
-            };
-
-            const idx = {
-                tienda:      findIdx(['tienda', 'store', 'vendedor'], 0),
-                producto:    findIdx(['producto', 'product', 'item', 'sku'], 1),
-                precioMin:   findIdx(['nimo', 'minimo', 'min price'], 2),
-                precioVenta: findIdx(['venta', 'sale'], 3),
-                link:        findIdx(['link', 'url', 'publicaci'], 4),
-                id:          findIdx(['id'], 5),
-            };
-
+            const findIdx = (keywords, fallback) => { const found = headers.findIndex(h => keywords.some(k => h.includes(k))); return found !== -1 ? found : fallback; };
+            const idx = { tienda: findIdx(['tienda', 'store', 'vendedor'], 0), producto: findIdx(['producto', 'product', 'item', 'sku'], 1), precioMin: findIdx(['nimo', 'minimo', 'min price'], 2), precioVenta: findIdx(['venta', 'sale'], 3), link: findIdx(['link', 'url', 'publicaci'], 4), id: findIdx(['id'], 5) };
             const data = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
-
-                const values = [];
-                let inQ = false, cur = '';
-                for (const ch of lines[i]) {
-                    if (ch === '"') { inQ = !inQ; }
-                    else if (ch === ',' && !inQ) { values.push(cur.trim().replace(/^"|"$/g, '')); cur = ''; }
-                    else { cur += ch; }
-                }
+                const values = []; let inQ = false, cur = '';
+                for (const ch of lines[i]) { if (ch === '"') { inQ = !inQ; } else if (ch === ',' && !inQ) { values.push(cur.trim().replace(/^"|"$/g, '')); cur = ''; } else { cur += ch; } }
                 values.push(cur.trim().replace(/^"|"$/g, ''));
-
                 const get = (i) => (i >= 0 && i < values.length ? values[i] || '' : '');
-
-                const precioMin   = cleanPrice(get(idx.precioMin));
-                const precioVenta = cleanPrice(get(idx.precioVenta));
-
+                const precioMin = cleanPrice(get(idx.precioMin)); const precioVenta = cleanPrice(get(idx.precioVenta));
                 if (precioMin === 0 && precioVenta === 0) continue;
-
-                const diferencia = precioVenta - precioMin;
-                const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
-
-                const id = get(idx.id).trim();
-                let linkUrl = '';
-                if (id && id.toUpperCase().startsWith('MLA')) {
-                    linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`;
-                }
-
+                const diferencia = precioVenta - precioMin; const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
+                const id = get(idx.id).trim(); let linkUrl = '';
+                if (id && id.toUpperCase().startsWith('MLA')) { linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`; }
                 data.push({ tienda: get(idx.tienda) || '(sin nombre)', producto: get(idx.producto) || '(sin producto)', precioMin, precioVenta, diferencia, porcentaje, link: linkUrl, id });
             }
-
             if (data.length === 0) throw new Error('No se encontraron filas con datos válidos.');
             return data;
         }
@@ -649,109 +495,45 @@
         // Carga de datos
         // ============================================================
         async function loadData() {
-            const loadingEl   = document.getElementById('loading-state');
-            const errorEl     = document.getElementById('error-state');
-            const contentEl   = document.getElementById('dashboard-content');
-            const refreshIcon = document.getElementById('refresh-icon');
-
-            refreshIcon.classList.add('fa-spin');
-            loadingEl.classList.remove('hidden');
-            loadingEl.classList.add('flex');
-            errorEl.classList.add('hidden');
-            contentEl.style.opacity = '0.5';
-            contentEl.style.pointerEvents = 'none';
-
+            const loadingEl = document.getElementById('loading-state'), errorEl = document.getElementById('error-state'), contentEl = document.getElementById('dashboard-content'), refreshIcon = document.getElementById('refresh-icon');
+            refreshIcon.classList.add('fa-spin'); loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); errorEl.classList.add('hidden'); contentEl.style.opacity = '0.5'; contentEl.style.pointerEvents = 'none';
             try {
-                const url = SHEET_URL + '&t=' + Date.now();
-                const response = await fetch(url);
+                const response = await fetch(SHEET_URL + '&t=' + Date.now());
                 if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
                 const csvText = await response.text();
                 if (!csvText.trim()) throw new Error('La respuesta del servidor está vacía');
-
-                const data = parseCSV(csvText);
-                allData = data;
-                processData(data);
-                document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR');
-                errorEl.classList.add('hidden');
-
-            } catch (err) {
-                console.error('Error:', err);
-                document.getElementById('error-message').textContent = err.message;
-                errorEl.classList.remove('hidden');
-            } finally {
-                loadingEl.classList.add('hidden');
-                loadingEl.classList.remove('flex');
-                contentEl.style.opacity = '1';
-                contentEl.style.pointerEvents = 'auto';
-                refreshIcon.classList.remove('fa-spin');
-            }
+                allData = parseCSV(csvText); processData(allData);
+                document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR'); errorEl.classList.add('hidden');
+            } catch (err) { console.error('Error:', err); document.getElementById('error-message').textContent = err.message; errorEl.classList.remove('hidden'); }
+            finally { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); contentEl.style.opacity = '1'; contentEl.style.pointerEvents = 'auto'; refreshIcon.classList.remove('fa-spin'); }
         }
 
         // ============================================================
         // Procesar y renderizar
         // ============================================================
         function processData(data) {
-            document.getElementById('kpi-total').textContent    = data.length;
-            document.getElementById('kpi-stores').textContent   = new Set(data.map(d => d.tienda)).size;
+            document.getElementById('kpi-total').textContent = data.length;
+            document.getElementById('kpi-stores').textContent = new Set(data.map(d => d.tienda)).size;
             document.getElementById('kpi-products').textContent = new Set(data.map(d => d.producto)).size;
-
             const avg = data.reduce((s, d) => s + d.porcentaje, 0) / data.length;
             document.getElementById('kpi-diff').textContent = avg.toFixed(1) + '%';
+            const critical = data.filter(d => d.porcentaje > 20).length, medium = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length, low = data.filter(d => d.porcentaje < 10).length;
+            document.getElementById('count-critical').textContent = critical; document.getElementById('count-medium').textContent = medium; document.getElementById('count-low').textContent = low;
 
-            const critical = data.filter(d => d.porcentaje > 20).length;
-            const medium   = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length;
-            const low      = data.filter(d => d.porcentaje < 10).length;
-
-            document.getElementById('count-critical').textContent = critical;
-            document.getElementById('count-medium').textContent   = medium;
-            document.getElementById('count-low').textContent      = low;
-
-            const storeCounts = {};
-            data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
+            const storeCounts = {}; data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
             const topStores = Object.entries(storeCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
-            updateChart('storesChart', 'bar', {
-                labels: topStores.map(s => s[0].length > 18 ? s[0].slice(0,16)+'…' : s[0]),
-                datasets: [{ data: topStores.map(s => s[1]), backgroundColor: '#3b82f6', borderRadius: 6 }]
-            }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+            updateChart('storesChart', 'bar', { labels: topStores.map(s => s[0].length > 18 ? s[0].slice(0,16)+'…' : s[0]), datasets: [{ data: topStores.map(s => s[1]), backgroundColor: '#3b82f6', borderRadius: 6 }] }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
-            const prodCounts = {};
-            data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
+            const prodCounts = {}; data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
             const topProds = Object.entries(prodCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
-            updateChart('productsChart', 'bar', {
-                labels: topProds.map(p => p[0].length > 22 ? p[0].slice(0,20)+'…' : p[0]),
-                datasets: [{ data: topProds.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
-            }, { plugins: { legend: { display: false } } });
+            updateChart('productsChart', 'bar', { labels: topProds.map(p => p[0].length > 22 ? p[0].slice(0,20)+'…' : p[0]), datasets: [{ data: topProds.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }] }, { plugins: { legend: { display: false } } });
 
-            updateChart('severityChart', 'doughnut', {
-                labels: ['Crítico', 'Medio', 'Bajo'],
-                datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444','#f59e0b','#10b981'], borderWidth: 0 }]
-            }, { cutout: '70%', plugins: { legend: { display: false } } });
+            updateChart('severityChart', 'doughnut', { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444','#f59e0b','#10b981'], borderWidth: 0 }] }, { cutout: '70%', plugins: { legend: { display: false } } });
 
-            const alertsEl = document.getElementById('alerts-container');
-            alertsEl.innerHTML = '';
+            const alertsEl = document.getElementById('alerts-container'); alertsEl.innerHTML = '';
             const topAlerts = data.filter(d => d.porcentaje > 15).sort((a,b) => b.porcentaje-a.porcentaje).slice(0,5);
-            if (topAlerts.length === 0) {
-                alertsEl.innerHTML = '<p class="text-slate-500 text-sm">No hay alertas críticas activas.</p>';
-            } else {
-                topAlerts.forEach(c => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700';
-                    div.innerHTML = `
-                        <div class="w-2 h-2 rounded-full flex-shrink-0 ${c.porcentaje > 20 ? 'bg-red-500' : 'bg-amber-500'}"></div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-white truncate">${c.tienda}</p>
-                            <p class="text-xs text-slate-400 truncate">${c.producto}</p>
-                        </div>
-                        <div class="text-right flex-shrink-0 flex items-center gap-2">
-                            <p class="text-sm font-bold ${c.porcentaje > 20 ? 'text-red-400' : 'text-amber-400'}">-${c.porcentaje.toFixed(1)}%</p>
-                            ${c.link ? `<a href="${c.link}" target="_blank" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : ''}
-                        </div>
-                    `;
-                    alertsEl.appendChild(div);
-                });
-            }
-
+            if (topAlerts.length === 0) { alertsEl.innerHTML = '<p class="text-slate-500 text-sm">No hay alertas críticas activas.</p>'; }
+            else { topAlerts.forEach(c => { const div = document.createElement('div'); div.className = 'flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700'; div.innerHTML = `<div class="w-2 h-2 rounded-full flex-shrink-0 ${c.porcentaje > 20 ? 'bg-red-500' : 'bg-amber-500'}"></div><div class="flex-1 min-w-0"><p class="text-sm font-medium text-white truncate">${c.tienda}</p><p class="text-xs text-slate-400 truncate">${c.producto}</p></div><div class="text-right flex-shrink-0 flex items-center gap-2"><p class="text-sm font-bold ${c.porcentaje > 20 ? 'text-red-400' : 'text-amber-400'}">-${c.porcentaje.toFixed(1)}%</p>${c.link ? `<a href="${c.link}" target="_blank" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : ''}</div>`; alertsEl.appendChild(div); }); }
             renderTable(data);
         }
 
@@ -759,81 +541,30 @@
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (charts[canvasId]) charts[canvasId].destroy();
             const isCartesian = type !== 'doughnut' && type !== 'pie';
-            charts[canvasId] = new Chart(ctx, {
-                type, data,
-                options: {
-                    responsive: true, maintainAspectRatio: false, ...options,
-                    scales: isCartesian ? {
-                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-                    } : {}
-                }
-            });
+            charts[canvasId] = new Chart(ctx, { type, data, options: { responsive: true, maintainAspectRatio: false, ...options, scales: isCartesian ? { x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }, y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } } } : {} } });
         }
 
         function renderTable(data) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">No hay resultados.</td></tr>';
-                return;
-            }
-
+            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">No hay resultados.</td></tr>'; return; }
             data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/50 transition-colors';
-
+                const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-800/50 transition-colors';
                 let sClass = 'severity-low', sText = 'Baja';
-                if (row.porcentaje > 20)       { sClass = 'severity-high';   sText = 'Crítica'; }
-                else if (row.porcentaje >= 10) { sClass = 'severity-medium'; sText = 'Media'; }
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white">${row.tienda}</td>
-                    <td class="px-6 py-4 text-slate-300 text-xs">${row.producto}</td>
-                    <td class="px-6 py-4 text-right text-slate-300">$${row.precioMin.toLocaleString('es-AR')}</td>
-                    <td class="px-6 py-4 text-right text-slate-300">$${row.precioVenta.toLocaleString('es-AR')}</td>
-                    <td class="px-6 py-4 text-right font-semibold text-red-400">
-                        -$${Math.abs(row.diferencia).toLocaleString('es-AR')} (${row.porcentaje.toFixed(1)}%)
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${sClass}">${sText}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        ${row.link
-                            ? `<a href="${row.link}" target="_blank" rel="noopener" class="link-btn">
-                                <i class="fas fa-external-link-alt text-[10px]"></i> Ver
-                               </a>`
-                            : '<span class="text-slate-600 text-xs">—</span>'
-                        }
-                    </td>
-                `;
+                if (row.porcentaje > 20) { sClass = 'severity-high'; sText = 'Crítica'; } else if (row.porcentaje >= 10) { sClass = 'severity-medium'; sText = 'Media'; }
+                tr.innerHTML = `<td class="px-6 py-4 font-medium text-white">${row.tienda}</td><td class="px-6 py-4 text-slate-300 text-xs">${row.producto}</td><td class="px-6 py-4 text-right text-slate-300">$${row.precioMin.toLocaleString('es-AR')}</td><td class="px-6 py-4 text-right text-slate-300">$${row.precioVenta.toLocaleString('es-AR')}</td><td class="px-6 py-4 text-right font-semibold text-red-400">-$${Math.abs(row.diferencia).toLocaleString('es-AR')} (${row.porcentaje.toFixed(1)}%)</td><td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sClass}">${sText}</span></td><td class="px-6 py-4 text-center">${row.link ? `<a href="${row.link}" target="_blank" rel="noopener" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : '<span class="text-slate-600 text-xs">—</span>'}</td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function filterTable() {
-            const search   = document.getElementById('search-input').value.toLowerCase();
-            const severity = document.getElementById('filter-severity').value;
-            const filtered = allData.filter(row => {
-                const matchSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search);
-                let matchSev = true;
-                if      (severity === 'high')   matchSev = row.porcentaje > 20;
-                else if (severity === 'medium') matchSev = row.porcentaje >= 10 && row.porcentaje <= 20;
-                else if (severity === 'low')    matchSev = row.porcentaje < 10;
-                return matchSearch && matchSev;
-            });
+            const search = document.getElementById('search-input').value.toLowerCase(), severity = document.getElementById('filter-severity').value;
+            const filtered = allData.filter(row => { const matchSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search); let matchSev = true; if (severity === 'high') matchSev = row.porcentaje > 20; else if (severity === 'medium') matchSev = row.porcentaje >= 10 && row.porcentaje <= 20; else if (severity === 'low') matchSev = row.porcentaje < 10; return matchSearch && matchSev; });
             renderTable(filtered);
         }
 
         function sortTable(column) {
-            if (sortState.column === column) sortState.asc = !sortState.asc;
-            else { sortState.column = column; sortState.asc = true; }
-            allData.sort((a, b) => {
-                const va = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column];
-                const vb = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column];
-                return sortState.asc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
-            });
+            if (sortState.column === column) sortState.asc = !sortState.asc; else { sortState.column = column; sortState.asc = true; }
+            allData.sort((a, b) => { const va = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column]; const vb = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column]; return sortState.asc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0); });
             filterTable();
         }
 
