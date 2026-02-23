@@ -69,7 +69,7 @@
             cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.15s;
         }
         .sheet-check input:checked { background: #3b82f6; border-color: #3b82f6; }
-        .sheet-check input:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 11px; font-weight: 700; }
+        .sheet-check input:checked::after { content: '\2713'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 11px; font-weight: 700; }
         .sheet-check .s-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
         .sheet-check .s-desc { font-size: 11px; color: #64748b; }
 
@@ -327,11 +327,11 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN
+        // CONFIGURACION
         // ============================================================
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
 
-        // Supabase (para reporte histórico)
+        // Supabase (para reporte historico)
         const SUPABASE_URL = 'https://zqkmfrqgexwhyujhncqg.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa21mcnFnZXh3aHl1amhuY3FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY4NTEsImV4cCI6MjA4NTk3Mjg1MX0.lL3_DGCMNrCyvCoVinGTqVDZRcRj1y9rzFSEFMOrqOc';
 
@@ -360,7 +360,6 @@
             btn.classList.add('active');
         }
 
-        // Click fuera del modal lo cierra
         document.getElementById('exportModal').addEventListener('click', function(e) {
             if (e.target === this) closeExportModal();
         });
@@ -406,12 +405,19 @@
 
                 const wb = XLSX.utils.book_new();
 
-                // --- Obtener datos de Supabase ---
-                const escaneos = await supaFetch('escaneos',
-                    `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc`);
+                // --- Obtener escaneos del periodo (paginado) ---
+                let allEscaneos = [];
+                let escOffset = 0;
+                while (true) {
+                    const batch = await supaFetch('escaneos',
+                        `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc&limit=1000&offset=${escOffset}`);
+                    allEscaneos = allEscaneos.concat(batch);
+                    if (batch.length < 1000) break;
+                    escOffset += 1000;
+                }
 
-                if (escaneos.length === 0) {
-                    // Si no hay datos en Supabase, exportar lo del dashboard actual
+                if (allEscaneos.length === 0) {
+                    // Fallback: exportar datos del dashboard actual
                     if (document.getElementById('expInfractores').checked) {
                         const rows = allData.map(d => ({
                             'Tienda': d.tienda,
@@ -426,7 +432,6 @@
                         ws['!cols'] = [{ wch:25 },{ wch:35 },{ wch:14 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:45 }];
                         XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
                     }
-
                     const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
                     XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
                     statusEl.textContent = '✓ Excel descargado (datos del dashboard actual)';
@@ -434,7 +439,7 @@
                     return;
                 }
 
-                const escaneoIds = escaneos.map(e => e.id);
+                const escaneoIds = allEscaneos.map(e => e.id);
 
                 // Productos
                 const productos = await supaFetch('productos', 'select=id,nombre,precio_minimo,sku&activo=eq.true');
@@ -443,20 +448,35 @@
 
                 // Escaneo map
                 const escMap = {};
-                escaneos.forEach(e => { escMap[e.id] = e; });
+                allEscaneos.forEach(e => { escMap[e.id] = e; });
 
-                // Listados infractores (paginado)
+                // ================================================
+                // Listados infractores - EN LOTES de 50 escaneos
+                // para no exceder el limite de largo de URL
+                // ================================================
                 let allListados = [];
-                let offset = 0;
-                while (true) {
-                    const batch = await supaFetch('listados_ml',
-                        `select=*&es_infractor=eq.true&escaneo_id=in.(${escaneoIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
-                    allListados = allListados.concat(batch);
-                    if (batch.length < 1000) break;
-                    offset += 1000;
+                const BATCH_SIZE = 50;
+
+                for (let i = 0; i < escaneoIds.length; i += BATCH_SIZE) {
+                    const batchIds = escaneoIds.slice(i, i + BATCH_SIZE);
+                    let offset = 0;
+
+                    while (true) {
+                        const results = await supaFetch('listados_ml',
+                            `select=*&es_infractor=eq.true&escaneo_id=in.(${batchIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
+                        allListados = allListados.concat(results);
+                        if (results.length < 1000) break;
+                        offset += 1000;
+                    }
+
+                    // Actualizar progreso en el boton
+                    const progreso = Math.min(100, Math.round(((i + BATCH_SIZE) / escaneoIds.length) * 100));
+                    document.getElementById('exportGoText').textContent = `Cargando datos... ${progreso}%`;
                 }
 
-                // Enriquecer
+                document.getElementById('exportGoText').textContent = 'Generando Excel...';
+
+                // Enriquecer listados con datos de producto y fecha
                 const enriched = allListados.map(l => {
                     const esc = escMap[l.escaneo_id] || {};
                     const prod = prodMap[esc.producto_id] || {};
@@ -481,10 +501,11 @@
                     XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
                 }
 
-                // ========== HOJA 2: EVOLUCIÓN ==========
+                // ========== HOJA 2: EVOLUCION DE PRECIOS ==========
                 if (document.getElementById('expEvolucion').checked) {
                     const hist = {};
-                    enriched.sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
+                    // Ordenar por fecha ascendente para calcular cambios
+                    [...enriched].sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
                         .forEach(l => {
                             const key = `${l.item_id_ml}_${l.seller_id}`;
                             if (!hist[key]) hist[key] = { item: l.item_id_ml, seller: l.seller_nickname, producto: l.producto_nombre, regs: [] };
@@ -514,21 +535,21 @@
                     XLSX.utils.book_append_sheet(wb, ws2, 'Evolución Precios');
                 }
 
-                // ========== HOJA 3: RESUMEN ==========
+                // ========== HOJA 3: RESUMEN POR PRODUCTO ==========
                 if (document.getElementById('expResumen').checked) {
-                    const res = {};
+                    const resumen = {};
                     enriched.forEach(l => {
                         const p = l.producto_nombre || 'Sin producto';
-                        if (!res[p]) res[p] = { producto: p, pm: l.precio_minimo_prod, cnt: 0, sellers: new Set(), low: Infinity, prices: [], first: l.fecha_escaneo, last: l.fecha_escaneo };
-                        res[p].cnt++;
-                        res[p].sellers.add(l.seller_id);
-                        if (l.precio < res[p].low) res[p].low = l.precio;
-                        res[p].prices.push(l.precio);
-                        if (new Date(l.fecha_escaneo) < new Date(res[p].first)) res[p].first = l.fecha_escaneo;
-                        if (new Date(l.fecha_escaneo) > new Date(res[p].last)) res[p].last = l.fecha_escaneo;
+                        if (!resumen[p]) resumen[p] = { producto: p, pm: l.precio_minimo_prod, cnt: 0, sellers: new Set(), low: Infinity, prices: [], first: l.fecha_escaneo, last: l.fecha_escaneo };
+                        resumen[p].cnt++;
+                        resumen[p].sellers.add(l.seller_id);
+                        if (l.precio < resumen[p].low) resumen[p].low = l.precio;
+                        resumen[p].prices.push(l.precio);
+                        if (new Date(l.fecha_escaneo) < new Date(resumen[p].first)) resumen[p].first = l.fecha_escaneo;
+                        if (new Date(l.fecha_escaneo) > new Date(resumen[p].last)) resumen[p].last = l.fecha_escaneo;
                     });
 
-                    const resRows = Object.values(res).map(r => ({
+                    const resRows = Object.values(resumen).map(r => ({
                         'Producto': r.producto,
                         'Precio Mínimo': r.pm,
                         'Total Infracciones': r.cnt,
@@ -562,7 +583,7 @@
         }
 
         // ============================================================
-        // CSV Parser robusto (tu código original)
+        // CSV Parser robusto
         // ============================================================
         function cleanPrice(val) {
             return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0;
