@@ -6,6 +6,7 @@
     <title>Monitor de Precios - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -30,9 +31,110 @@
         .logo-fallback { display:none; width:100%; height:100%; align-items:center; justify-content:center; color:#60a5fa; font-weight:bold; font-size:20px; position:relative; z-index:1; }
         .link-btn { display:inline-flex; align-items:center; gap:4px; color:#60a5fa; font-size:11px; padding:2px 8px; border-radius:4px; border:1px solid rgba(96,165,250,0.3); background:rgba(96,165,250,0.05); transition:all 0.15s; white-space:nowrap; }
         .link-btn:hover { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.6); }
+
+        /* Modal Export */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+            padding: 32px; width: 90%; max-width: 460px; position: relative;
+            box-shadow: 0 25px 60px -12px rgba(0,0,0,0.5);
+            animation: modalIn 0.25s ease-out;
+        }
+        @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; background: none; border: none;
+            color: #64748b; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .modal-close:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+
+        .period-btn {
+            flex: 1; padding: 16px 12px; background: #0f172a; border: 2px solid #334155;
+            border-radius: 12px; color: #94a3b8; font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center;
+        }
+        .period-btn:hover { border-color: #3b82f6; color: #e2e8f0; }
+        .period-btn.active { border-color: #3b82f6; color: #fff; background: rgba(59,130,246,0.15); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+        .period-btn .days { font-size: 28px; font-weight: 700; display: block; font-family: 'Inter', sans-serif; }
+        .period-btn .label { font-size: 11px; font-weight: 500; opacity: 0.7; }
+
+        .sheet-check { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+        .sheet-check:hover { border-color: rgba(59,130,246,0.4); }
+        .sheet-check input[type="checkbox"] {
+            appearance: none; width: 18px; height: 18px; border: 2px solid #475569; border-radius: 5px;
+            cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.15s;
+        }
+        .sheet-check input:checked { background: #3b82f6; border-color: #3b82f6; }
+        .sheet-check input:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 11px; font-weight: 700; }
+        .sheet-check .s-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+        .sheet-check .s-desc { font-size: 11px; color: #64748b; }
+
+        .export-go {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;
+            border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px;
+            font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .export-go:hover { box-shadow: 0 8px 25px rgba(59,130,246,0.3); transform: translateY(-1px); }
+        .export-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .export-status {
+            text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 500;
+            margin-top: 12px; display: none;
+        }
+        .export-status.ok { display: block; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+        .export-status.err { display: block; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
     </style>
 </head>
 <body class="text-slate-200 antialiased">
+
+    <!-- ============ MODAL EXPORTAR ============ -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeExportModal()">&times;</button>
+
+            <h2 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Exportar Reporte</h2>
+            <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Descargá un Excel con el detalle de infracciones</p>
+
+            <!-- Período -->
+            <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Período</p>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button class="period-btn active" onclick="setExportPeriod(30, this)">
+                    <span class="days">30</span><span class="label">días</span>
+                </button>
+                <button class="period-btn" onclick="setExportPeriod(60, this)">
+                    <span class="days">60</span><span class="label">días</span>
+                </button>
+            </div>
+
+            <!-- Hojas -->
+            <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Hojas del Excel</p>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
+                <label class="sheet-check">
+                    <input type="checkbox" id="expInfractores" checked>
+                    <div><div class="s-name">🚨 Infractores</div><div class="s-desc">Todas las infracciones con precio, seller y link</div></div>
+                </label>
+                <label class="sheet-check">
+                    <input type="checkbox" id="expEvolucion" checked>
+                    <div><div class="s-name">📈 Evolución de Precios</div><div class="s-desc">Cambios de precio por seller entre escaneos</div></div>
+                </label>
+                <label class="sheet-check">
+                    <input type="checkbox" id="expResumen" checked>
+                    <div><div class="s-name">📊 Resumen por Producto</div><div class="s-desc">Totales de infracciones y sellers por producto</div></div>
+                </label>
+            </div>
+
+            <button class="export-go" id="exportGoBtn" onclick="generarExcel()">
+                <i class="fas fa-file-excel"></i>
+                <span id="exportGoText">Descargar Excel</span>
+            </button>
+            <div class="export-status" id="exportStatus"></div>
+        </div>
+    </div>
 
     <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-6 py-4">
@@ -51,10 +153,14 @@
                         <p class="text-xs text-slate-400">Control de infractores - Mercado Libre</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <button onclick="openExportModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2 active:scale-95">
+                        <i class="fas fa-file-excel"></i>
+                        <span class="hidden sm:inline">Exportar</span>
+                    </button>
                     <button onclick="loadData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 active:scale-95">
                         <i class="fas fa-sync-alt" id="refresh-icon"></i>
-                        <span class="hidden sm:inline">Actualizar Datos</span>
+                        <span class="hidden sm:inline">Actualizar</span>
                     </button>
                     <div class="text-right hidden sm:block">
                         <p class="text-xs text-slate-400">Última actualización</p>
@@ -222,21 +328,242 @@
     <script>
         // ============================================================
         // CONFIGURACIÓN
-        // Publicá la hoja "Data" como CSV en Google Sheets y pegá la URL acá:
-        // Archivo → Compartir → Publicar en la web → elegí hoja "Data" → CSV
         // ============================================================
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
-        const REFRESH_INTERVAL_MIN = 5; // cada cuántos minutos se actualiza automáticamente
+
+        // Supabase (para reporte histórico)
+        const SUPABASE_URL = 'https://zqkmfrqgexwhyujhncqg.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa21mcnFnZXh3aHl1amhuY3FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY4NTEsImV4cCI6MjA4NTk3Mjg1MX0.lL3_DGCMNrCyvCoVinGTqVDZRcRj1y9rzFSEFMOrqOc';
 
         let allData = [];
         let charts = {};
         let sortState = { column: null, asc: true };
+        let exportDias = 30;
 
         // ============================================================
-        // CSV Parser robusto
+        // EXPORT MODAL
         // ============================================================
+        function openExportModal() {
+            if (allData.length === 0) { alert('Primero cargá los datos del dashboard.'); return; }
+            document.getElementById('exportModal').classList.add('active');
+            document.getElementById('exportStatus').className = 'export-status';
+            document.getElementById('exportStatus').style.display = 'none';
+        }
 
-        // Limpia precios con formato "$51,909.00" → 51909
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        function setExportPeriod(dias, btn) {
+            exportDias = dias;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Click fuera del modal lo cierra
+        document.getElementById('exportModal').addEventListener('click', function(e) {
+            if (e.target === this) closeExportModal();
+        });
+
+        // ============================================================
+        // SUPABASE HELPER
+        // ============================================================
+        async function supaFetch(table, query) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!res.ok) throw new Error(`Supabase error ${res.status} en ${table}`);
+            return res.json();
+        }
+
+        function formatFechaAR(iso) {
+            if (!iso) return '';
+            return new Date(iso).toLocaleString('es-AR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+                timeZone: 'America/Argentina/Buenos_Aires'
+            });
+        }
+
+        // ============================================================
+        // GENERAR EXCEL
+        // ============================================================
+        async function generarExcel() {
+            const btn = document.getElementById('exportGoBtn');
+            const statusEl = document.getElementById('exportStatus');
+            btn.disabled = true;
+            document.getElementById('exportGoText').textContent = 'Generando...';
+            statusEl.style.display = 'none';
+
+            try {
+                const desde = new Date();
+                desde.setDate(desde.getDate() - exportDias);
+                const desdeISO = desde.toISOString();
+
+                const wb = XLSX.utils.book_new();
+
+                // --- Obtener datos de Supabase ---
+                const escaneos = await supaFetch('escaneos',
+                    `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc`);
+
+                if (escaneos.length === 0) {
+                    // Si no hay datos en Supabase, exportar lo del dashboard actual
+                    if (document.getElementById('expInfractores').checked) {
+                        const rows = allData.map(d => ({
+                            'Tienda': d.tienda,
+                            'Producto': d.producto,
+                            'Precio Mínimo': d.precioMin,
+                            'Precio Venta': d.precioVenta,
+                            'Diferencia $': d.diferencia,
+                            'Diferencia %': d.porcentaje.toFixed(1) + '%',
+                            'Link': d.link
+                        }));
+                        const ws = XLSX.utils.json_to_sheet(rows);
+                        ws['!cols'] = [{ wch:25 },{ wch:35 },{ wch:14 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:45 }];
+                        XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
+                    }
+
+                    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+                    XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
+                    statusEl.textContent = '✓ Excel descargado (datos del dashboard actual)';
+                    statusEl.className = 'export-status ok';
+                    return;
+                }
+
+                const escaneoIds = escaneos.map(e => e.id);
+
+                // Productos
+                const productos = await supaFetch('productos', 'select=id,nombre,precio_minimo,sku&activo=eq.true');
+                const prodMap = {};
+                productos.forEach(p => { prodMap[p.id] = p; });
+
+                // Escaneo map
+                const escMap = {};
+                escaneos.forEach(e => { escMap[e.id] = e; });
+
+                // Listados infractores (paginado)
+                let allListados = [];
+                let offset = 0;
+                while (true) {
+                    const batch = await supaFetch('listados_ml',
+                        `select=*&es_infractor=eq.true&escaneo_id=in.(${escaneoIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
+                    allListados = allListados.concat(batch);
+                    if (batch.length < 1000) break;
+                    offset += 1000;
+                }
+
+                // Enriquecer
+                const enriched = allListados.map(l => {
+                    const esc = escMap[l.escaneo_id] || {};
+                    const prod = prodMap[esc.producto_id] || {};
+                    return { ...l, fecha_escaneo: esc.fecha, producto_nombre: prod.nombre, precio_minimo_prod: prod.precio_minimo };
+                });
+
+                // ========== HOJA 1: INFRACTORES ==========
+                if (document.getElementById('expInfractores').checked) {
+                    const rows = enriched.map(l => ({
+                        'Fecha': formatFechaAR(l.fecha_escaneo),
+                        'Producto': l.producto_nombre || '',
+                        'Precio Mínimo': l.precio_minimo_prod || '',
+                        'Seller': l.seller_nickname || '',
+                        'Seller ID': l.seller_id || '',
+                        'Publicación': l.item_id_ml || '',
+                        'Precio Venta': l.precio || '',
+                        'Diferencia %': l.diferencia_pct || '',
+                        'Link': l.permalink || ''
+                    }));
+                    const ws = XLSX.utils.json_to_sheet(rows);
+                    ws['!cols'] = [{ wch:18 },{ wch:35 },{ wch:14 },{ wch:25 },{ wch:12 },{ wch:16 },{ wch:14 },{ wch:12 },{ wch:45 }];
+                    XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
+                }
+
+                // ========== HOJA 2: EVOLUCIÓN ==========
+                if (document.getElementById('expEvolucion').checked) {
+                    const hist = {};
+                    enriched.sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
+                        .forEach(l => {
+                            const key = `${l.item_id_ml}_${l.seller_id}`;
+                            if (!hist[key]) hist[key] = { item: l.item_id_ml, seller: l.seller_nickname, producto: l.producto_nombre, regs: [] };
+                            hist[key].regs.push({ fecha: l.fecha_escaneo, precio: l.precio });
+                        });
+
+                    const evoRows = [];
+                    Object.values(hist).forEach(h => {
+                        h.regs.forEach((r, i) => {
+                            const prev = i > 0 ? h.regs[i - 1] : null;
+                            const cambio = prev ? r.precio - prev.precio : 0;
+                            evoRows.push({
+                                'Fecha': formatFechaAR(r.fecha),
+                                'Producto': h.producto,
+                                'Seller': h.seller,
+                                'Publicación': h.item,
+                                'Precio': r.precio,
+                                'Precio Anterior': prev ? prev.precio : '-',
+                                'Cambio $': cambio !== 0 ? cambio : '-',
+                                'Cambio %': prev && cambio !== 0 ? ((cambio / prev.precio) * 100).toFixed(1) + '%' : '-'
+                            });
+                        });
+                    });
+
+                    const ws2 = XLSX.utils.json_to_sheet(evoRows);
+                    ws2['!cols'] = [{ wch:18 },{ wch:35 },{ wch:25 },{ wch:16 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:10 }];
+                    XLSX.utils.book_append_sheet(wb, ws2, 'Evolución Precios');
+                }
+
+                // ========== HOJA 3: RESUMEN ==========
+                if (document.getElementById('expResumen').checked) {
+                    const res = {};
+                    enriched.forEach(l => {
+                        const p = l.producto_nombre || 'Sin producto';
+                        if (!res[p]) res[p] = { producto: p, pm: l.precio_minimo_prod, cnt: 0, sellers: new Set(), low: Infinity, prices: [], first: l.fecha_escaneo, last: l.fecha_escaneo };
+                        res[p].cnt++;
+                        res[p].sellers.add(l.seller_id);
+                        if (l.precio < res[p].low) res[p].low = l.precio;
+                        res[p].prices.push(l.precio);
+                        if (new Date(l.fecha_escaneo) < new Date(res[p].first)) res[p].first = l.fecha_escaneo;
+                        if (new Date(l.fecha_escaneo) > new Date(res[p].last)) res[p].last = l.fecha_escaneo;
+                    });
+
+                    const resRows = Object.values(res).map(r => ({
+                        'Producto': r.producto,
+                        'Precio Mínimo': r.pm,
+                        'Total Infracciones': r.cnt,
+                        'Sellers Infractores': r.sellers.size,
+                        'Precio Más Bajo': r.low === Infinity ? '-' : r.low,
+                        'Precio Promedio': Math.round(r.prices.reduce((a, b) => a + b, 0) / r.prices.length),
+                        'Primera Detección': formatFechaAR(r.first),
+                        'Última Detección': formatFechaAR(r.last)
+                    }));
+
+                    const ws3 = XLSX.utils.json_to_sheet(resRows);
+                    ws3['!cols'] = [{ wch:35 },{ wch:14 },{ wch:16 },{ wch:18 },{ wch:16 },{ wch:16 },{ wch:18 },{ wch:18 }];
+                    XLSX.utils.book_append_sheet(wb, ws3, 'Resumen Productos');
+                }
+
+                // --- Descargar ---
+                const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+                XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
+
+                statusEl.textContent = `✓ Reporte descargado — ${enriched.length} infracciones en ${exportDias} días`;
+                statusEl.className = 'export-status ok';
+
+            } catch (err) {
+                console.error('Error exportando:', err);
+                statusEl.textContent = 'Error: ' + err.message;
+                statusEl.className = 'export-status err';
+            } finally {
+                btn.disabled = false;
+                document.getElementById('exportGoText').textContent = 'Descargar Excel';
+            }
+        }
+
+        // ============================================================
+        // CSV Parser robusto (tu código original)
+        // ============================================================
         function cleanPrice(val) {
             return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0;
         }
@@ -245,11 +572,8 @@
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) throw new Error('El CSV está vacío');
 
-            // Headers: normalizar ignorando encoding roto (Precio MÃ­nimo → igual se detecta por posición)
             const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-            console.log('Headers detectados:', headers);
 
-            // Buscar por nombre, con fallback por posición fija (orden de tu hoja: Tienda, Producto, Precio Mínimo, Precio Venta, Link, ID)
             const findIdx = (keywords, fallback) => {
                 const found = headers.findIndex(h => keywords.some(k => h.includes(k)));
                 return found !== -1 ? found : fallback;
@@ -258,18 +582,16 @@
             const idx = {
                 tienda:      findIdx(['tienda', 'store', 'vendedor'], 0),
                 producto:    findIdx(['producto', 'product', 'item', 'sku'], 1),
-                precioMin:   findIdx(['nimo', 'minimo', 'min price'], 2),  // "nimo" captura "mínimo" aunque venga con encoding roto
+                precioMin:   findIdx(['nimo', 'minimo', 'min price'], 2),
                 precioVenta: findIdx(['venta', 'sale'], 3),
                 link:        findIdx(['link', 'url', 'publicaci'], 4),
                 id:          findIdx(['id'], 5),
             };
-            console.log('Índices columnas:', idx);
 
             const data = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
 
-                // Split CSV respetando comillas (maneja "$51,909.00" sin romper)
                 const values = [];
                 let inQ = false, cur = '';
                 for (const ch of lines[i]) {
@@ -281,7 +603,6 @@
 
                 const get = (i) => (i >= 0 && i < values.length ? values[i] || '' : '');
 
-                // Limpiar precios: saca $, comas de miles → número limpio
                 const precioMin   = cleanPrice(get(idx.precioMin));
                 const precioVenta = cleanPrice(get(idx.precioVenta));
 
@@ -290,26 +611,16 @@
                 const diferencia = precioVenta - precioMin;
                 const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
 
-                // Link: el HYPERLINK se pierde al exportar CSV, construirlo desde el ID
                 const id = get(idx.id).trim();
                 let linkUrl = '';
                 if (id && id.toUpperCase().startsWith('MLA')) {
                     linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`;
                 }
 
-                data.push({
-                    tienda:      get(idx.tienda)   || '(sin nombre)',
-                    producto:    get(idx.producto) || '(sin producto)',
-                    precioMin,
-                    precioVenta,
-                    diferencia,
-                    porcentaje,
-                    link: linkUrl,
-                    id
-                });
+                data.push({ tienda: get(idx.tienda) || '(sin nombre)', producto: get(idx.producto) || '(sin producto)', precioMin, precioVenta, diferencia, porcentaje, link: linkUrl, id });
             }
 
-            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos. Revisá que la hoja "Data" tenga registros.');
+            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos.');
             return data;
         }
 
@@ -375,7 +686,6 @@
             document.getElementById('count-medium').textContent   = medium;
             document.getElementById('count-low').textContent      = low;
 
-            // Chart tiendas
             const storeCounts = {};
             data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
             const topStores = Object.entries(storeCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
@@ -384,7 +694,6 @@
                 datasets: [{ data: topStores.map(s => s[1]), backgroundColor: '#3b82f6', borderRadius: 6 }]
             }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
-            // Chart productos
             const prodCounts = {};
             data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
             const topProds = Object.entries(prodCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
@@ -393,13 +702,11 @@
                 datasets: [{ data: topProds.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
             }, { plugins: { legend: { display: false } } });
 
-            // Chart severidad
             updateChart('severityChart', 'doughnut', {
                 labels: ['Crítico', 'Medio', 'Bajo'],
                 datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444','#f59e0b','#10b981'], borderWidth: 0 }]
             }, { cutout: '70%', plugins: { legend: { display: false } } });
 
-            // Alertas
             const alertsEl = document.getElementById('alerts-container');
             alertsEl.innerHTML = '';
             const topAlerts = data.filter(d => d.porcentaje > 15).sort((a,b) => b.porcentaje-a.porcentaje).slice(0,5);
@@ -434,9 +741,7 @@
             charts[canvasId] = new Chart(ctx, {
                 type, data,
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    ...options,
+                    responsive: true, maintainAspectRatio: false, ...options,
                     scales: isCartesian ? {
                         x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
                         y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
@@ -511,9 +816,8 @@
             filterTable();
         }
 
-      window.addEventListener('load', loadData);
-      setInterval(loadData, 5 * 60 * 1000); // auto-refresh cada 5 minutos
+        window.addEventListener('load', loadData);
+        setInterval(loadData, 5 * 60 * 1000);
     </script>
 </body>
 </html>
-
