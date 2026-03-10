@@ -3,573 +3,1079 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Precios - Dashboard</title>
+    <title>Monitor de Precios — Rylo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
-        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
-        .severity-high   { background: rgba(239,68,68,0.2);   color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
-        .severity-medium { background: rgba(245,158,11,0.2);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
-        .severity-low    { background: rgba(16,185,129,0.2);  color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        .loading-spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #3b82f6; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .logo-container { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.1)); border:1px solid rgba(59,130,246,0.2); display:flex; align-items:center; justify-content:center; padding:6px; position:relative; overflow:hidden; }
-        .logo-container::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2)); opacity:0; transition:opacity 0.3s; }
-        .logo-container:hover::before { opacity:1; }
-        .logo-img { width:100%; height:100%; object-fit:contain; position:relative; z-index:1; filter:drop-shadow(0 0 8px rgba(139,92,246,0.4)); }
-        .logo-fallback { display:none; width:100%; height:100%; align-items:center; justify-content:center; color:#60a5fa; font-weight:bold; font-size:20px; position:relative; z-index:1; }
-        .link-btn { display:inline-flex; align-items:center; gap:4px; color:#60a5fa; font-size:11px; padding:2px 8px; border-radius:4px; border:1px solid rgba(96,165,250,0.3); background:rgba(96,165,250,0.05); transition:all 0.15s; white-space:nowrap; }
-        .link-btn:hover { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.6); }
+        :root {
+            --bg:             #06080E;
+            --surface:        #0C0F18;
+            --surface-2:      #121620;
+            --surface-3:      #181D28;
+            --border:         rgba(255,255,255,0.07);
+            --border-hover:   rgba(255,255,255,0.13);
+            --accent:         #00CEB8;
+            --accent-dim:     rgba(0,206,184,0.08);
+            --accent-border:  rgba(0,206,184,0.22);
+            --accent-glow:    rgba(0,206,184,0.15);
+            --danger:         #F43F5E;
+            --danger-dim:     rgba(244,63,94,0.08);
+            --danger-border:  rgba(244,63,94,0.25);
+            --warning:        #F59E0B;
+            --warning-dim:    rgba(245,158,11,0.08);
+            --warning-border: rgba(245,158,11,0.25);
+            --violet:         #8B5CF6;
+            --violet-dim:     rgba(139,92,246,0.08);
+            --violet-border:  rgba(139,92,246,0.25);
+            --text:           #ECF0F7;
+            --text-muted:     #5A6478;
+            --text-sub:       #8892A4;
+        }
 
-        /* Modal Export */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* ── TYPOGRAPHY ── */
+        .font-display { font-family: 'Barlow Condensed', sans-serif; }
+        .font-data    { font-family: 'DM Mono', monospace; }
+
+        /* ── PANELS ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .panel-2 { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+
+        /* ── KPI CARDS ── */
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            cursor: default;
+        }
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 12px 12px 0 0;
+        }
+        .kpi-card:nth-child(1)::after { background: linear-gradient(90deg, var(--danger), transparent); }
+        .kpi-card:nth-child(2)::after { background: linear-gradient(90deg, var(--warning), transparent); }
+        .kpi-card:nth-child(3)::after { background: linear-gradient(90deg, var(--accent), transparent); }
+        .kpi-card:nth-child(4)::after { background: linear-gradient(90deg, var(--violet), transparent); }
+        .kpi-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+        }
+        .kpi-number {
+            font-family: 'DM Mono', monospace;
+            font-size: 2.8rem;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -1px;
+            color: var(--text);
+        }
+        .kpi-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ── SEVERITY BADGES ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+        .badge-high   { background: var(--danger-dim);  color: var(--danger);  border: 1px solid var(--danger-border); }
+        .badge-high::before { background: var(--danger); }
+        .badge-medium { background: var(--warning-dim); color: var(--warning); border: 1px solid var(--warning-border); }
+        .badge-medium::before { background: var(--warning); }
+        .badge-low    { background: var(--accent-dim);  color: var(--accent);  border: 1px solid var(--accent-border); }
+        .badge-low::before { background: var(--accent); }
+
+        /* ── ALERT ITEMS ── */
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-left-width: 2px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .alert-item:hover { background: var(--surface-3); }
+        .alert-item.critical { border-left-color: var(--danger); }
+        .alert-item.medium   { border-left-color: var(--warning); }
+
+        /* ── LINK BUTTON ── */
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent);
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-border);
+            background: var(--accent-dim);
+            transition: all 0.15s;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+        .link-btn:hover { background: rgba(0,206,184,0.14); border-color: rgba(0,206,184,0.45); }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary  { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: #00B8A4; box-shadow: 0 0 20px var(--accent-glow); }
+        .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--border-hover); background: var(--surface-3); }
+        .btn-export { background: rgba(16,185,129,0.1); color: #34D399; border: 1px solid rgba(16,185,129,0.2); }
+        .btn-export:hover { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.4); }
+
+        /* ── INPUTS ── */
+        .input-field {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .input-field:focus { border-color: var(--accent); }
+        .input-field::placeholder { color: var(--text-muted); }
+
+        /* ── TABLE ── */
+        .data-table { border-collapse: collapse; width: 100%; }
+        .data-table thead { position: sticky; top: 0; z-index: 10; background: var(--surface-2); }
+        .data-table thead th {
+            padding: 10px 20px;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+        .data-table thead th:hover { color: var(--text-sub); cursor: pointer; }
+        .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table tbody td { padding: 12px 20px; font-size: 13px; }
+
+        /* ── SPINNER ── */
+        .spinner {
+            width: 28px; height: 28px;
+            border: 2px solid rgba(255,255,255,0.06);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── PULSE DOT ── */
+        .pulse-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; width: 90%; max-width: 460px; position: relative; box-shadow: 0 25px 60px -12px rgba(0,0,0,0.5); animation: modalIn 0.25s ease-out; }
-        @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.15s; }
-        .modal-close:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
-        .period-btn { flex: 1; padding: 16px 12px; background: #0f172a; border: 2px solid #334155; border-radius: 12px; color: #94a3b8; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
-        .period-btn:hover { border-color: #3b82f6; color: #e2e8f0; }
-        .period-btn.active { border-color: #3b82f6; color: #fff; background: rgba(59,130,246,0.15); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
-        .period-btn .days { font-size: 28px; font-weight: 700; display: block; }
-        .period-btn .label { font-size: 11px; font-weight: 500; opacity: 0.7; }
-        .sheet-check { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
-        .sheet-check:hover { border-color: rgba(59,130,246,0.4); }
-        .sheet-check input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid #475569; border-radius: 5px; cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.15s; }
-        .sheet-check input:checked { background: #3b82f6; border-color: #3b82f6; }
-        .sheet-check input:checked::after { content: '\2713'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 11px; font-weight: 700; }
-        .sheet-check .s-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-        .sheet-check .s-desc { font-size: 11px; color: #64748b; }
-        .export-go { width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .export-go:hover { box-shadow: 0 8px 25px rgba(59,130,246,0.3); transform: translateY(-1px); }
-        .export-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .export-status { text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 500; margin-top: 12px; display: none; }
-        .export-status.ok { display: block; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
-        .export-status.err { display: block; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 460px;
+            position: relative;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+            animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn { from { opacity:0; transform: translateY(6px) scale(0.98); } to { opacity:1; transform: none; } }
+        .modal-close-btn {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none;
+            color: var(--text-muted);
+            font-size: 20px; cursor: pointer;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            transition: all 0.15s;
+            line-height: 1;
+        }
+        .modal-close-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+        .period-btn {
+            flex: 1; padding: 14px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .period-btn:hover { border-color: var(--accent-border); }
+        .period-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+        .period-btn .days {
+            font-family: 'DM Mono', monospace;
+            font-size: 30px;
+            font-weight: 500;
+            display: block;
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+        .period-btn.active .days { color: var(--accent); }
+        .period-btn .label { font-size: 11px; opacity: 0.7; font-family: 'Manrope', sans-serif; }
+
+        .sheet-check {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .sheet-check:hover { border-color: var(--border-hover); }
+        .sheet-check input[type="checkbox"] {
+            appearance: none;
+            width: 16px; height: 16px; min-width: 16px;
+            border: 1.5px solid var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            margin-top: 2px;
+            transition: all 0.15s;
+            background: transparent;
+        }
+        .sheet-check input:checked { background: var(--accent); border-color: var(--accent); }
+        .sheet-check input:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 5px;
+            width: 4px; height: 7px;
+            border: 2px solid #000;
+            border-top: none; border-left: none;
+            transform: rotate(45deg);
+        }
+        .sheet-check .s-name { font-size: 13px; font-weight: 700; color: var(--text); }
+        .sheet-check .s-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .export-go {
+            width: 100%; padding: 13px;
+            border-radius: 9px; border: none;
+            background: var(--accent);
+            color: #000;
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.15s;
+        }
+        .export-go:hover { background: #00B8A4; box-shadow: 0 0 24px var(--accent-glow); }
+        .export-go:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        .export-status {
+            display: none;
+            text-align: center;
+            padding: 10px; border-radius: 8px;
+            font-size: 12px; font-weight: 600;
+            margin-top: 12px;
+            font-family: 'Manrope', sans-serif;
+        }
+        .export-status.ok  { display:block; background: rgba(16,185,129,0.1); color: #34D399; border: 1px solid rgba(16,185,129,0.2); }
+        .export-status.err { display:block; background: var(--danger-dim); color: var(--danger); border: 1px solid var(--danger-border); }
+
+        /* ── LOADING / ERROR ── */
+        #loading-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; gap: 14px; }
+        #loading-state.flex { display: flex !important; }
+        #error-state.hidden { display: none !important; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2a3040; }
+
+        /* ── FADE-IN ── */
+        .fade-in   { animation: fadeIn 0.5s ease-out both; }
+        .fade-in-1 { animation: fadeIn 0.5s 0.08s ease-out both; }
+        .fade-in-2 { animation: fadeIn 0.5s 0.16s ease-out both; }
+        .fade-in-3 { animation: fadeIn 0.5s 0.24s ease-out both; }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+
+        /* ── DIVIDER ── */
+        .divider { height: 1px; background: var(--border); }
+
+        /* ── RESPONSIVE GRID ── */
+        .grid-kpi    { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-lower  { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
+
+        @media (max-width: 1024px) {
+            .grid-kpi    { grid-template-columns: repeat(2, 1fr); }
+            .grid-charts { grid-template-columns: 1fr; }
+            .grid-lower  { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .grid-kpi { grid-template-columns: 1fr 1fr; }
+            .kpi-number { font-size: 2.2rem; }
+            .hide-sm { display: none; }
+        }
     </style>
 </head>
-<body class="text-slate-200 antialiased">
+<body>
 
-    <!-- ============ MODAL EXPORTAR ============ -->
-    <div class="modal-overlay" id="exportModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeExportModal()">&times;</button>
-            <h2 style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Exportar Reporte</h2>
-            <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Descargá un Excel con el detalle de infracciones</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Período</p>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button class="period-btn active" onclick="setExportPeriod(30, this)"><span class="days">30</span><span class="label">días</span></button>
-                <button class="period-btn" onclick="setExportPeriod(60, this)"><span class="days">60</span><span class="label">días</span></button>
-            </div>
-            <p style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Hojas del Excel</p>
-            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
-                <label class="sheet-check">
-                    <input type="checkbox" id="expInfractores" checked>
-                    <div><div class="s-name">🚨 Infractores</div><div class="s-desc">Una fila por publicación única con precio actual y estado</div></div>
-                </label>
-                <label class="sheet-check">
-                    <input type="checkbox" id="expEvolucion" checked>
-                    <div><div class="s-name">📈 Evolución de Precios</div><div class="s-desc">Solo registra cuando el precio cambió (sube o baja)</div></div>
-                </label>
-                <label class="sheet-check">
-                    <input type="checkbox" id="expResumen" checked>
-                    <div><div class="s-name">📊 Resumen por Producto</div><div class="s-desc">Totales de infracciones y sellers por producto</div></div>
-                </label>
-            </div>
-            <button class="export-go" id="exportGoBtn" onclick="generarExcel()">
-                <i class="fas fa-file-excel"></i>
-                <span id="exportGoText">Descargar Excel</span>
+<!-- ═══════════════════════ MODAL EXPORTAR ═══════════════════════ -->
+<div class="modal-overlay" id="exportModal">
+    <div class="modal-box">
+        <button class="modal-close-btn" onclick="closeExportModal()">&times;</button>
+
+        <div style="margin-bottom:24px;">
+            <p class="section-label" style="margin-bottom:5px;">Reporte</p>
+            <h2 class="font-display" style="font-size:26px; font-weight:700; color:var(--text); letter-spacing:0.3px;">Exportar Infracciones</h2>
+            <p style="font-size:13px; color:var(--text-sub); margin-top:5px;">Generá un Excel con el detalle del período</p>
+        </div>
+
+        <p class="section-label" style="margin-bottom:10px;">Período</p>
+        <div style="display:flex; gap:10px; margin-bottom:24px;">
+            <button class="period-btn active" onclick="setExportPeriod(30, this)">
+                <span class="days">30</span><span class="label">días</span>
             </button>
-            <div class="export-status" id="exportStatus"></div>
+            <button class="period-btn" onclick="setExportPeriod(60, this)">
+                <span class="days">60</span><span class="label">días</span>
+            </button>
+        </div>
+
+        <p class="section-label" style="margin-bottom:10px;">Hojas del Excel</p>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+            <label class="sheet-check">
+                <input type="checkbox" id="expInfractores" checked>
+                <div><div class="s-name">🚨 Infractores</div><div class="s-desc">Una fila por publicación única con precio actual y estado</div></div>
+            </label>
+            <label class="sheet-check">
+                <input type="checkbox" id="expEvolucion" checked>
+                <div><div class="s-name">📈 Evolución de Precios</div><div class="s-desc">Solo registra cuando el precio cambió</div></div>
+            </label>
+            <label class="sheet-check">
+                <input type="checkbox" id="expResumen" checked>
+                <div><div class="s-name">📊 Resumen por Producto</div><div class="s-desc">Totales de infracciones y sellers por producto</div></div>
+            </label>
+        </div>
+
+        <button class="export-go" id="exportGoBtn" onclick="generarExcel()">
+            <i class="fas fa-file-excel"></i>
+            <span id="exportGoText">Descargar Excel</span>
+        </button>
+        <div class="export-status" id="exportStatus"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header style="background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50;">
+    <div style="max-width:1340px; margin:0 auto; padding:0 24px; height:58px; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+
+        <!-- Logo + Title -->
+        <div style="display:flex; align-items:center; gap:13px;">
+            <div style="width:34px; height:34px; border-radius:8px; background:var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                <img src="logo-rylo.png" alt="Rylo" style="width:100%; height:100%; object-fit:contain;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:17px; color:var(--accent);">R</div>
+            </div>
+            <div>
+                <div style="display:flex; align-items:center; gap:9px;">
+                    <h1 class="font-display" style="font-size:17px; font-weight:700; letter-spacing:1px; color:var(--text); text-transform:uppercase;">Monitor de Precios</h1>
+                    <span style="font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-border); letter-spacing:1.5px;">RYLO</span>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:1px;">Infracciones de precios · Mercado Libre</p>
+            </div>
+        </div>
+
+        <!-- Actions + Status -->
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="hide-sm" style="display:flex; align-items:center; gap:7px; padding:6px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px;">
+                <div class="pulse-dot"></div>
+                <span style="font-size:11px; color:var(--text-muted);">Últ. actualización</span>
+                <span class="font-data" style="font-size:11px; color:var(--text);" id="last-update">--</span>
+            </div>
+            <button onclick="openExportModal()" class="btn btn-export">
+                <i class="fas fa-file-excel" style="font-size:12px;"></i>
+                <span class="hide-sm">Exportar</span>
+            </button>
+            <button onclick="loadData()" class="btn btn-primary">
+                <i class="fas fa-sync-alt" id="refresh-icon" style="font-size:12px;"></i>
+                <span class="hide-sm">Actualizar</span>
+            </button>
         </div>
     </div>
+</header>
 
-    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="logo-container">
-                        <img src="logo-rylo.png" alt="Rylo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="logo-fallback">R</div>
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main style="max-width:1340px; margin:0 auto; padding:24px; display:flex; flex-direction:column; gap:16px;">
+
+    <!-- Loading -->
+    <div id="loading-state">
+        <div class="spinner"></div>
+        <p style="color:var(--text-muted); font-size:13px;">Cargando datos...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="hidden" style="background:var(--surface); border:1px solid var(--danger-border); border-radius:12px; padding:40px; text-align:center;">
+        <i class="fas fa-circle-exclamation" style="font-size:28px; color:var(--danger); margin-bottom:14px; display:block;"></i>
+        <h3 style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px;">Error al cargar datos</h3>
+        <p style="color:var(--text-sub); font-size:13px; margin-bottom:6px;" id="error-message"></p>
+        <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Verificá que el Sheet esté publicado: Archivo → Compartir → Publicar en la web → Hoja "Data" → CSV</p>
+        <button onclick="loadData()" class="btn btn-secondary" style="margin:0 auto;">Reintentar</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-content">
+
+        <!-- KPIs -->
+        <div class="grid-kpi fade-in" style="margin-bottom:16px;">
+
+            <div class="kpi-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <p style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Total Infracciones</p>
+                    <div class="kpi-icon" style="background:var(--danger-dim); color:var(--danger);">
+                        <i class="fas fa-triangle-exclamation"></i>
                     </div>
+                </div>
+                <div class="kpi-number" id="kpi-total">—</div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">registros activos</p>
+            </div>
+
+            <div class="kpi-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <p style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Tiendas Infractoras</p>
+                    <div class="kpi-icon" style="background:var(--warning-dim); color:var(--warning);">
+                        <i class="fas fa-store"></i>
+                    </div>
+                </div>
+                <div class="kpi-number" id="kpi-stores">—</div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">vendedores únicos</p>
+            </div>
+
+            <div class="kpi-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <p style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Productos Afectados</p>
+                    <div class="kpi-icon" style="background:var(--accent-dim); color:var(--accent);">
+                        <i class="fas fa-box"></i>
+                    </div>
+                </div>
+                <div class="kpi-number" id="kpi-products">—</div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">diferentes SKU</p>
+            </div>
+
+            <div class="kpi-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <p style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Diferencia Promedio</p>
+                    <div class="kpi-icon" style="background:var(--violet-dim); color:var(--violet);">
+                        <i class="fas fa-percent"></i>
+                    </div>
+                </div>
+                <div class="kpi-number" style="color:var(--danger);" id="kpi-diff">—</div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">por debajo del mínimo</p>
+            </div>
+
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-charts fade-in-1" style="margin-bottom:16px;">
+
+            <div class="panel" style="padding:22px;">
+                <p class="section-label" style="margin-bottom:4px;">Rankings</p>
+                <h3 class="font-display" style="font-size:19px; font-weight:700; color:var(--text); margin-bottom:2px;">Top 10 Tiendas Infractoras</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">Por cantidad de infracciones detectadas</p>
+                <div style="height:256px;"><canvas id="storesChart"></canvas></div>
+            </div>
+
+            <div class="panel" style="padding:22px;">
+                <p class="section-label" style="margin-bottom:4px;">Rankings</p>
+                <h3 class="font-display" style="font-size:19px; font-weight:700; color:var(--text); margin-bottom:2px;">Productos Más Infringidos</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">Por volumen de infracciones activas</p>
+                <div style="height:256px;"><canvas id="productsChart"></canvas></div>
+            </div>
+
+        </div>
+
+        <!-- Severity + Alerts -->
+        <div class="grid-lower fade-in-2" style="margin-bottom:16px;">
+
+            <div class="panel" style="padding:22px;">
+                <p class="section-label" style="margin-bottom:4px;">Análisis</p>
+                <h3 class="font-display" style="font-size:19px; font-weight:700; color:var(--text); margin-bottom:20px;">Severidad</h3>
+                <div style="height:180px; display:flex; align-items:center; justify-content:center;">
+                    <canvas id="severityChart"></canvas>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:9px; margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:13px; color:var(--text-sub); display:flex; align-items:center; gap:8px;">
+                            <span style="width:7px; height:7px; border-radius:2px; background:var(--danger); display:inline-block; flex-shrink:0;"></span>Crítico (&gt;20%)
+                        </span>
+                        <span class="font-data" style="font-size:14px; color:var(--text);" id="count-critical">0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:13px; color:var(--text-sub); display:flex; align-items:center; gap:8px;">
+                            <span style="width:7px; height:7px; border-radius:2px; background:var(--warning); display:inline-block; flex-shrink:0;"></span>Medio (10–20%)
+                        </span>
+                        <span class="font-data" style="font-size:14px; color:var(--text);" id="count-medium">0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:13px; color:var(--text-sub); display:flex; align-items:center; gap:8px;">
+                            <span style="width:7px; height:7px; border-radius:2px; background:var(--accent); display:inline-block; flex-shrink:0;"></span>Bajo (&lt;10%)
+                        </span>
+                        <span class="font-data" style="font-size:14px; color:var(--text);" id="count-low">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="padding:22px;">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px;">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h1 class="font-bold text-xl text-white tracking-tight">Monitor de Precios</h1>
-                            <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Rylo</span>
-                        </div>
-                        <p class="text-xs text-slate-400">Control de infractores - Mercado Libre</p>
+                        <p class="section-label" style="margin-bottom:4px;">Tiempo real</p>
+                        <h3 class="font-display" style="font-size:19px; font-weight:700; color:var(--text);">Alertas Críticas</h3>
                     </div>
+                    <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--danger); background:var(--danger-dim); border:1px solid var(--danger-border); padding:3px 8px; border-radius:4px; letter-spacing:1px;">LIVE</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="openExportModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2 active:scale-95">
-                        <i class="fas fa-file-excel"></i>
-                        <span class="hidden sm:inline">Exportar</span>
-                    </button>
-                    <button onclick="loadData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 active:scale-95">
-                        <i class="fas fa-sync-alt" id="refresh-icon"></i>
-                        <span class="hidden sm:inline">Actualizar</span>
-                    </button>
-                    <div class="text-right hidden sm:block">
-                        <p class="text-xs text-slate-400">Última actualización</p>
-                        <p class="text-sm font-medium text-white font-mono" id="last-update">--</p>
-                    </div>
+                <div style="display:flex; flex-direction:column; gap:8px; max-height:270px; overflow-y:auto;" id="alerts-container">
+                    <p style="color:var(--text-muted); font-size:13px;">Cargando...</p>
                 </div>
+            </div>
+
+        </div>
+
+        <!-- Table -->
+        <div class="panel fade-in-3" style="overflow:hidden;">
+            <div style="padding:18px 22px; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
+                <div>
+                    <h3 class="font-display" style="font-size:19px; font-weight:700; color:var(--text); margin-bottom:2px;">Detalle de Infracciones</h3>
+                    <p style="font-size:12px; color:var(--text-muted);">Listado completo · click en "Ver" para abrir la publicación</p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="search-input" placeholder="Buscar tienda o producto..." class="input-field" style="width:220px;" onkeyup="filterTable()">
+                    <select id="filter-severity" onchange="filterTable()" class="input-field">
+                        <option value="all">Todas</option>
+                        <option value="high">Críticas</option>
+                        <option value="medium">Medias</option>
+                        <option value="low">Bajas</option>
+                    </select>
+                </div>
+            </div>
+            <div style="overflow-x:auto; max-height:480px; overflow-y:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('tienda')" style="text-align:left; cursor:pointer;">Tienda <i class="fas fa-sort" style="opacity:0.35; font-size:9px;"></i></th>
+                            <th onclick="sortTable('producto')" style="text-align:left; cursor:pointer;">Producto <i class="fas fa-sort" style="opacity:0.35; font-size:9px;"></i></th>
+                            <th onclick="sortTable('precioMin')" style="text-align:right; cursor:pointer;">Precio Mín <i class="fas fa-sort" style="opacity:0.35; font-size:9px;"></i></th>
+                            <th onclick="sortTable('precioVenta')" style="text-align:right; cursor:pointer;">Precio Venta <i class="fas fa-sort" style="opacity:0.35; font-size:9px;"></i></th>
+                            <th onclick="sortTable('diferencia')" style="text-align:right; cursor:pointer;">Diferencia <i class="fas fa-sort" style="opacity:0.35; font-size:9px;"></i></th>
+                            <th style="text-align:center;">Severidad</th>
+                            <th style="text-align:center;">Ver</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
             </div>
         </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        <div id="loading-state" class="hidden flex-col items-center justify-center py-20">
-            <div class="loading-spinner mb-4"></div>
-            <p class="text-slate-400">Cargando datos desde Google Sheets...</p>
-        </div>
-        <div id="error-state" class="hidden glass-panel rounded-2xl p-8 text-center border border-red-500/30">
-            <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-            <h3 class="text-lg font-semibold text-white mb-2">Error al cargar datos</h3>
-            <p class="text-slate-400 mb-2" id="error-message"></p>
-            <p class="text-slate-500 text-xs mb-4">Verificá que el Sheet esté publicado: Archivo → Compartir → Publicar en la web → Hoja "Data" → CSV</p>
-            <button onclick="loadData()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">Reintentar</button>
-        </div>
-        <div id="dashboard-content" class="space-y-6">
-            <!-- KPIs -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Total Infracciones</p><h3 class="text-3xl font-bold text-white" id="kpi-total">--</h3></div><div class="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-400"></i></div></div><span class="text-slate-500 text-sm">registros activos</span></div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Tiendas Infractoras</p><h3 class="text-3xl font-bold text-white" id="kpi-stores">--</h3></div><div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center"><i class="fas fa-store text-orange-400"></i></div></div><span class="text-slate-500 text-sm">vendedores únicos</span></div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Productos Afectados</p><h3 class="text-3xl font-bold text-white" id="kpi-products">--</h3></div><div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-box text-amber-400"></i></div></div><span class="text-slate-500 text-sm">diferentes SKU</span></div>
-                <div class="glass-panel rounded-2xl p-6 hover-lift border border-slate-700/50"><div class="flex justify-between items-start mb-4"><div><p class="text-slate-400 text-sm font-medium mb-1">Diferencia Promedio</p><h3 class="text-3xl font-bold text-white" id="kpi-diff">--%</h3></div><div class="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center"><i class="fas fa-percentage text-emerald-400"></i></div></div><span class="text-slate-500 text-sm">por debajo del mínimo</span></div>
-            </div>
-            <!-- Charts -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in" style="animation-delay:0.1s">
-                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50"><h3 class="text-lg font-semibold text-white mb-1">Top 10 Tiendas Infractoras</h3><p class="text-sm text-slate-400 mb-4">Por cantidad de infracciones</p><div class="h-64"><canvas id="storesChart"></canvas></div></div>
-                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50"><h3 class="text-lg font-semibold text-white mb-1">Productos Más Infringidos</h3><p class="text-sm text-slate-400 mb-4">Por volumen de infracciones</p><div class="h-64"><canvas id="productsChart"></canvas></div></div>
-            </div>
-            <!-- Severidad + Alertas -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in" style="animation-delay:0.2s">
-                <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
-                    <h3 class="text-lg font-semibold text-white mb-4">Distribución por Severidad</h3>
-                    <div class="h-48 flex items-center justify-center"><canvas id="severityChart"></canvas></div>
-                    <div class="mt-4 space-y-2 text-sm">
-                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Crítico (&gt;20%)</span><span class="font-semibold text-white" id="count-critical">0</span></div>
-                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Medio (10-20%)</span><span class="font-semibold text-white" id="count-medium">0</span></div>
-                        <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Bajo (&lt;10%)</span><span class="font-semibold text-white" id="count-low">0</span></div>
-                    </div>
-                </div>
-                <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-700/50">
-                    <h3 class="text-lg font-semibold text-white mb-4">Alertas Críticas</h3>
-                    <div class="space-y-3 max-h-64 overflow-y-auto" id="alerts-container"><p class="text-slate-500 text-sm">Cargando...</p></div>
-                </div>
-            </div>
-            <!-- Tabla -->
-            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/50 fade-in" style="animation-delay:0.3s">
-                <div class="p-6 border-b border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div><h3 class="text-lg font-semibold text-white">Detalle de Infracciones</h3><p class="text-sm text-slate-400">Listado completo · click en "Ver" para abrir la publicación</p></div>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <input type="text" id="search-input" placeholder="Buscar tienda o producto..." class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64" onkeyup="filterTable()">
-                        <select id="filter-severity" onchange="filterTable()" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500">
-                            <option value="all">Todas</option><option value="high">Críticas</option><option value="medium">Medias</option><option value="low">Bajas</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-800/80 text-slate-400 sticky top-0 z-10"><tr>
-                            <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('tienda')">Tienda <i class="fas fa-sort ml-1"></i></th>
-                            <th class="px-6 py-3 font-medium cursor-pointer hover:text-white" onclick="sortTable('producto')">Producto <i class="fas fa-sort ml-1"></i></th>
-                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioMin')">Precio Mín <i class="fas fa-sort ml-1"></i></th>
-                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('precioVenta')">Precio Venta <i class="fas fa-sort ml-1"></i></th>
-                            <th class="px-6 py-3 font-medium text-right cursor-pointer hover:text-white" onclick="sortTable('diferencia')">Diferencia <i class="fas fa-sort ml-1"></i></th>
-                            <th class="px-6 py-3 font-medium text-center">Severidad</th>
-                            <th class="px-6 py-3 font-medium text-center">Publicación</th>
-                        </tr></thead>
-                        <tbody class="divide-y divide-slate-800" id="table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div><!-- /dashboard-content -->
+</main>
 
-    <script>
-        // ============================================================
-        // CONFIGURACION
-        // ============================================================
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
-        const SUPABASE_URL = 'https://zqkmfrqgexwhyujhncqg.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa21mcnFnZXh3aHl1amhuY3FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY4NTEsImV4cCI6MjA4NTk3Mjg1MX0.lL3_DGCMNrCyvCoVinGTqVDZRcRj1y9rzFSEFMOrqOc';
+<script>
+// ============================================================
+// CONFIGURACION
+// ============================================================
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9CFEP45lmbJIpOW_SM5cjYDtPFbLNA4M2lUJZw61EzSaGuq_BAvfS9tc0Py0sJWB8QcQOylGVoiX4/pub?gid=161136587&single=true&output=csv';
+const SUPABASE_URL = 'https://zqkmfrqgexwhyujhncqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa21mcnFnZXh3aHl1amhuY3FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY4NTEsImV4cCI6MjA4NTk3Mjg1MX0.lL3_DGCMNrCyvCoVinGTqVDZRcRj1y9rzFSEFMOrqOc';
 
-        let allData = [];
-        let charts = {};
-        let sortState = { column: null, asc: true };
-        let exportDias = 30;
+let allData = [];
+let charts = {};
+let sortState = { column: null, asc: true };
+let exportDias = 30;
 
-        // ============================================================
-        // EXPORT MODAL
-        // ============================================================
-        function openExportModal() {
-            if (allData.length === 0) { alert('Primero cargá los datos del dashboard.'); return; }
-            document.getElementById('exportModal').classList.add('active');
-            document.getElementById('exportStatus').className = 'export-status';
-            document.getElementById('exportStatus').style.display = 'none';
+// ============================================================
+// EXPORT MODAL
+// ============================================================
+function openExportModal() {
+    if (allData.length === 0) { alert('Primero cargá los datos del dashboard.'); return; }
+    document.getElementById('exportModal').classList.add('active');
+    document.getElementById('exportStatus').className = 'export-status';
+    document.getElementById('exportStatus').style.display = 'none';
+}
+function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
+function setExportPeriod(dias, btn) {
+    exportDias = dias;
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+document.getElementById('exportModal').addEventListener('click', function(e) { if (e.target === this) closeExportModal(); });
+
+// ============================================================
+// SUPABASE HELPER
+// ============================================================
+async function supaFetch(table, query) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`Supabase error ${res.status} en ${table}`);
+    return res.json();
+}
+
+function formatFechaAR(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+}
+
+// ============================================================
+// GENERAR EXCEL
+// ============================================================
+async function generarExcel() {
+    const btn = document.getElementById('exportGoBtn');
+    const statusEl = document.getElementById('exportStatus');
+    btn.disabled = true;
+    document.getElementById('exportGoText').textContent = 'Generando...';
+    statusEl.style.display = 'none';
+
+    try {
+        const desde = new Date();
+        desde.setDate(desde.getDate() - exportDias);
+        const desdeISO = desde.toISOString();
+        const wb = XLSX.utils.book_new();
+
+        let allEscaneos = [];
+        let escOffset = 0;
+        while (true) {
+            const batch = await supaFetch('escaneos', `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc&limit=1000&offset=${escOffset}`);
+            allEscaneos = allEscaneos.concat(batch);
+            if (batch.length < 1000) break;
+            escOffset += 1000;
         }
-        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
-        function setExportPeriod(dias, btn) {
-            exportDias = dias;
-            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        document.getElementById('exportModal').addEventListener('click', function(e) { if (e.target === this) closeExportModal(); });
 
-        // ============================================================
-        // SUPABASE HELPER
-        // ============================================================
-        async function supaFetch(table, query) {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+        if (allEscaneos.length === 0) {
+            if (document.getElementById('expInfractores').checked) {
+                const rows = allData.map(d => ({ 'Tienda': d.tienda, 'Producto': d.producto, 'Precio Mínimo': d.precioMin, 'Precio Venta': d.precioVenta, 'Diferencia $': d.diferencia, 'Diferencia %': d.porcentaje.toFixed(1) + '%', 'Link': d.link }));
+                const ws = XLSX.utils.json_to_sheet(rows);
+                ws['!cols'] = [{ wch:25 },{ wch:35 },{ wch:14 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:45 }];
+                XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
+            }
+            XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${new Date().toLocaleDateString('es-AR').replace(/\//g, '-')}.xlsx`);
+            statusEl.textContent = '✓ Excel descargado (datos del dashboard actual)';
+            statusEl.className = 'export-status ok';
+            return;
+        }
+
+        const escaneoIds = allEscaneos.map(e => e.id);
+        const productos = await supaFetch('productos', 'select=id,nombre,precio_minimo,sku&activo=eq.true');
+        const prodMap = {}; productos.forEach(p => { prodMap[p.id] = p; });
+        const escMap = {}; allEscaneos.forEach(e => { escMap[e.id] = e; });
+
+        let allListados = [];
+        const BATCH_SIZE = 50;
+        for (let i = 0; i < escaneoIds.length; i += BATCH_SIZE) {
+            const batchIds = escaneoIds.slice(i, i + BATCH_SIZE);
+            let offset = 0;
+            while (true) {
+                const results = await supaFetch('listados_ml', `select=*&es_infractor=eq.true&escaneo_id=in.(${batchIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
+                allListados = allListados.concat(results);
+                if (results.length < 1000) break;
+                offset += 1000;
+            }
+            const progreso = Math.min(100, Math.round(((i + BATCH_SIZE) / escaneoIds.length) * 100));
+            document.getElementById('exportGoText').textContent = `Cargando datos... ${progreso}%`;
+        }
+
+        document.getElementById('exportGoText').textContent = 'Procesando...';
+
+        const enriched = allListados.map(l => {
+            const esc = escMap[l.escaneo_id] || {};
+            const prod = prodMap[esc.producto_id] || {};
+            return { ...l, fecha_escaneo: esc.fecha, producto_nombre: prod.nombre, precio_minimo_prod: prod.precio_minimo };
+        });
+
+        const pubMap = {};
+        enriched.sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
+            .forEach(l => {
+                const key = l.item_id_ml;
+                if (!pubMap[key]) {
+                    pubMap[key] = {
+                        item_id_ml: l.item_id_ml, seller: l.seller_nickname, seller_id: l.seller_id,
+                        producto: l.producto_nombre, precio_minimo: l.precio_minimo_prod, permalink: l.permalink,
+                        primer_precio: l.precio, precio_actual: l.precio, precio_mas_bajo: l.precio,
+                        primera_deteccion: l.fecha_escaneo, ultima_deteccion: l.fecha_escaneo,
+                        veces_detectado: 0, cambios: [{ fecha: l.fecha_escaneo, precio: l.precio }]
+                    };
+                }
+                const pub = pubMap[key];
+                pub.veces_detectado++;
+                pub.ultima_deteccion = l.fecha_escaneo;
+                pub.precio_actual = l.precio;
+                if (l.precio < pub.precio_mas_bajo) pub.precio_mas_bajo = l.precio;
+                const ultimoCambio = pub.cambios[pub.cambios.length - 1];
+                if (l.precio !== ultimoCambio.precio) pub.cambios.push({ fecha: l.fecha_escaneo, precio: l.precio });
             });
-            if (!res.ok) throw new Error(`Supabase error ${res.status} en ${table}`);
-            return res.json();
+
+        const publicaciones = Object.values(pubMap);
+
+        if (document.getElementById('expInfractores').checked) {
+            const rows = publicaciones.map(p => {
+                const diffPct = p.precio_minimo > 0 ? (((p.precio_actual - p.precio_minimo) / p.precio_minimo) * 100).toFixed(1) + '%' : '-';
+                const tendencia = p.precio_actual < p.primer_precio ? '⬇ Bajó' : p.precio_actual > p.primer_precio ? '⬆ Subió' : '= Igual';
+                return { 'Publicación': p.item_id_ml, 'Seller': p.seller, 'Producto': p.producto || '', 'Precio Mínimo': p.precio_minimo || '', 'Precio Actual': p.precio_actual, 'Precio Más Bajo': p.precio_mas_bajo, 'Diferencia %': diffPct, 'Primer Precio': p.primer_precio, 'Tendencia': tendencia, 'Cambios de Precio': p.cambios.length - 1, 'Primera Detección': formatFechaAR(p.primera_deteccion), 'Última Detección': formatFechaAR(p.ultima_deteccion), 'Veces Detectado': p.veces_detectado, 'Link': p.permalink || '' };
+            });
+            rows.sort((a, b) => a['Precio Actual'] - b['Precio Actual']);
+            const ws = XLSX.utils.json_to_sheet(rows);
+            ws['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:13 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:13 },{ wch:10 },{ wch:14 },{ wch:18 },{ wch:18 },{ wch:14 },{ wch:45 }];
+            XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
         }
 
-        function formatFechaAR(iso) {
-            if (!iso) return '';
-            return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
-        }
-
-        // ============================================================
-        // GENERAR EXCEL - LOGICA CORREGIDA
-        // Publicaciones unicas + solo cambios de precio
-        // ============================================================
-        async function generarExcel() {
-            const btn = document.getElementById('exportGoBtn');
-            const statusEl = document.getElementById('exportStatus');
-            btn.disabled = true;
-            document.getElementById('exportGoText').textContent = 'Generando...';
-            statusEl.style.display = 'none';
-
-            try {
-                const desde = new Date();
-                desde.setDate(desde.getDate() - exportDias);
-                const desdeISO = desde.toISOString();
-                const wb = XLSX.utils.book_new();
-
-                // --- Obtener escaneos del periodo (paginado) ---
-                let allEscaneos = [];
-                let escOffset = 0;
-                while (true) {
-                    const batch = await supaFetch('escaneos', `select=id,producto_id,fecha,total_resultados,total_infractores&fecha=gte.${desdeISO}&order=fecha.desc&limit=1000&offset=${escOffset}`);
-                    allEscaneos = allEscaneos.concat(batch);
-                    if (batch.length < 1000) break;
-                    escOffset += 1000;
-                }
-
-                if (allEscaneos.length === 0) {
-                    // Fallback: exportar datos del dashboard actual
-                    if (document.getElementById('expInfractores').checked) {
-                        const rows = allData.map(d => ({ 'Tienda': d.tienda, 'Producto': d.producto, 'Precio Mínimo': d.precioMin, 'Precio Venta': d.precioVenta, 'Diferencia $': d.diferencia, 'Diferencia %': d.porcentaje.toFixed(1) + '%', 'Link': d.link }));
-                        const ws = XLSX.utils.json_to_sheet(rows);
-                        ws['!cols'] = [{ wch:25 },{ wch:35 },{ wch:14 },{ wch:14 },{ wch:14 },{ wch:12 },{ wch:45 }];
-                        XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
-                    }
-                    XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${new Date().toLocaleDateString('es-AR').replace(/\//g, '-')}.xlsx`);
-                    statusEl.textContent = '✓ Excel descargado (datos del dashboard actual)';
-                    statusEl.className = 'export-status ok';
-                    return;
-                }
-
-                const escaneoIds = allEscaneos.map(e => e.id);
-                const productos = await supaFetch('productos', 'select=id,nombre,precio_minimo,sku&activo=eq.true');
-                const prodMap = {}; productos.forEach(p => { prodMap[p.id] = p; });
-                const escMap = {}; allEscaneos.forEach(e => { escMap[e.id] = e; });
-
-                // Listados infractores en lotes de 50
-                let allListados = [];
-                const BATCH_SIZE = 50;
-                for (let i = 0; i < escaneoIds.length; i += BATCH_SIZE) {
-                    const batchIds = escaneoIds.slice(i, i + BATCH_SIZE);
-                    let offset = 0;
-                    while (true) {
-                        const results = await supaFetch('listados_ml', `select=*&es_infractor=eq.true&escaneo_id=in.(${batchIds.join(',')})&order=created_at.desc&limit=1000&offset=${offset}`);
-                        allListados = allListados.concat(results);
-                        if (results.length < 1000) break;
-                        offset += 1000;
-                    }
-                    const progreso = Math.min(100, Math.round(((i + BATCH_SIZE) / escaneoIds.length) * 100));
-                    document.getElementById('exportGoText').textContent = `Cargando datos... ${progreso}%`;
-                }
-
-                document.getElementById('exportGoText').textContent = 'Procesando...';
-
-                // Enriquecer
-                const enriched = allListados.map(l => {
-                    const esc = escMap[l.escaneo_id] || {};
-                    const prod = prodMap[esc.producto_id] || {};
-                    return { ...l, fecha_escaneo: esc.fecha, producto_nombre: prod.nombre, precio_minimo_prod: prod.precio_minimo };
+        if (document.getElementById('expEvolucion').checked) {
+            const evoRows = [];
+            publicaciones.forEach(p => {
+                if (p.cambios.length <= 1) return;
+                p.cambios.forEach((c, i) => {
+                    const prev = i > 0 ? p.cambios[i - 1] : null;
+                    const cambio = prev ? c.precio - prev.precio : 0;
+                    evoRows.push({ 'Publicación': p.item_id_ml, 'Seller': p.seller, 'Producto': p.producto, 'Fecha del Cambio': formatFechaAR(c.fecha), 'Precio': c.precio, 'Precio Anterior': prev ? prev.precio : '(inicio)', 'Cambio $': prev ? cambio : '-', 'Cambio %': prev ? ((cambio / prev.precio) * 100).toFixed(1) + '%' : '-', 'Dirección': !prev ? 'Inicio' : cambio < 0 ? '⬇ Bajó' : '⬆ Subió' });
                 });
-
-                // ================================================
-                // AGRUPAR POR PUBLICACION UNICA (item_id_ml)
-                // ================================================
-                const pubMap = {}; // key = item_id_ml
-                enriched.sort((a, b) => new Date(a.fecha_escaneo) - new Date(b.fecha_escaneo))
-                    .forEach(l => {
-                        const key = l.item_id_ml;
-                        if (!pubMap[key]) {
-                            pubMap[key] = {
-                                item_id_ml: l.item_id_ml,
-                                seller: l.seller_nickname,
-                                seller_id: l.seller_id,
-                                producto: l.producto_nombre,
-                                precio_minimo: l.precio_minimo_prod,
-                                permalink: l.permalink,
-                                // Tracking
-                                primer_precio: l.precio,
-                                precio_actual: l.precio,
-                                precio_mas_bajo: l.precio,
-                                primera_deteccion: l.fecha_escaneo,
-                                ultima_deteccion: l.fecha_escaneo,
-                                veces_detectado: 0,
-                                // Historial de CAMBIOS (solo cuando cambia el precio)
-                                cambios: [{ fecha: l.fecha_escaneo, precio: l.precio }]
-                            };
-                        }
-                        const pub = pubMap[key];
-                        pub.veces_detectado++;
-                        pub.ultima_deteccion = l.fecha_escaneo;
-                        pub.precio_actual = l.precio;
-                        if (l.precio < pub.precio_mas_bajo) pub.precio_mas_bajo = l.precio;
-
-                        // Solo agregar al historial si el precio CAMBIO
-                        const ultimoCambio = pub.cambios[pub.cambios.length - 1];
-                        if (l.precio !== ultimoCambio.precio) {
-                            pub.cambios.push({ fecha: l.fecha_escaneo, precio: l.precio });
-                        }
-                    });
-
-                const publicaciones = Object.values(pubMap);
-
-                // ========== HOJA 1: INFRACTORES (1 fila por publicacion unica) ==========
-                if (document.getElementById('expInfractores').checked) {
-                    const rows = publicaciones.map(p => {
-                        const diffPct = p.precio_minimo > 0 ? (((p.precio_actual - p.precio_minimo) / p.precio_minimo) * 100).toFixed(1) + '%' : '-';
-                        const tendencia = p.precio_actual < p.primer_precio ? '⬇ Bajó' : p.precio_actual > p.primer_precio ? '⬆ Subió' : '= Igual';
-                        return {
-                            'Publicación': p.item_id_ml,
-                            'Seller': p.seller,
-                            'Producto': p.producto || '',
-                            'Precio Mínimo': p.precio_minimo || '',
-                            'Precio Actual': p.precio_actual,
-                            'Precio Más Bajo': p.precio_mas_bajo,
-                            'Diferencia %': diffPct,
-                            'Primer Precio': p.primer_precio,
-                            'Tendencia': tendencia,
-                            'Cambios de Precio': p.cambios.length - 1,
-                            'Primera Detección': formatFechaAR(p.primera_deteccion),
-                            'Última Detección': formatFechaAR(p.ultima_deteccion),
-                            'Veces Detectado': p.veces_detectado,
-                            'Link': p.permalink || ''
-                        };
-                    });
-                    rows.sort((a, b) => a['Precio Actual'] - b['Precio Actual']);
-                    const ws = XLSX.utils.json_to_sheet(rows);
-                    ws['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:13 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:13 },{ wch:10 },{ wch:14 },{ wch:18 },{ wch:18 },{ wch:14 },{ wch:45 }];
-                    XLSX.utils.book_append_sheet(wb, ws, 'Infractores');
-                }
-
-                // ========== HOJA 2: EVOLUCION (solo cambios de precio) ==========
-                if (document.getElementById('expEvolucion').checked) {
-                    const evoRows = [];
-                    publicaciones.forEach(p => {
-                        // Solo incluir publicaciones que tuvieron al menos 1 cambio
-                        if (p.cambios.length <= 1) return;
-
-                        p.cambios.forEach((c, i) => {
-                            const prev = i > 0 ? p.cambios[i - 1] : null;
-                            const cambio = prev ? c.precio - prev.precio : 0;
-                            evoRows.push({
-                                'Publicación': p.item_id_ml,
-                                'Seller': p.seller,
-                                'Producto': p.producto,
-                                'Fecha del Cambio': formatFechaAR(c.fecha),
-                                'Precio': c.precio,
-                                'Precio Anterior': prev ? prev.precio : '(inicio)',
-                                'Cambio $': prev ? cambio : '-',
-                                'Cambio %': prev ? ((cambio / prev.precio) * 100).toFixed(1) + '%' : '-',
-                                'Dirección': !prev ? 'Inicio' : cambio < 0 ? '⬇ Bajó' : '⬆ Subió'
-                            });
-                        });
-                    });
-
-                    if (evoRows.length === 0) {
-                        evoRows.push({ 'Publicación': 'Sin cambios de precio en el período', 'Seller': '', 'Producto': '', 'Fecha del Cambio': '', 'Precio': '', 'Precio Anterior': '', 'Cambio $': '', 'Cambio %': '', 'Dirección': '' });
-                    }
-
-                    const ws2 = XLSX.utils.json_to_sheet(evoRows);
-                    ws2['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:18 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:10 },{ wch:10 }];
-                    XLSX.utils.book_append_sheet(wb, ws2, 'Evolución Precios');
-                }
-
-                // ========== HOJA 3: RESUMEN POR PRODUCTO ==========
-                if (document.getElementById('expResumen').checked) {
-                    const resumen = {};
-                    publicaciones.forEach(p => {
-                        const prod = p.producto || 'Sin producto';
-                        if (!resumen[prod]) resumen[prod] = { producto: prod, pm: p.precio_minimo, pubs: 0, sellers: new Set(), low: Infinity, prices: [], conCambios: 0 };
-                        resumen[prod].pubs++;
-                        resumen[prod].sellers.add(p.seller_id);
-                        if (p.precio_mas_bajo < resumen[prod].low) resumen[prod].low = p.precio_mas_bajo;
-                        resumen[prod].prices.push(p.precio_actual);
-                        if (p.cambios.length > 1) resumen[prod].conCambios++;
-                    });
-
-                    const resRows = Object.values(resumen).map(r => ({
-                        'Producto': r.producto,
-                        'Precio Mínimo': r.pm,
-                        'Publicaciones Infractoras': r.pubs,
-                        'Sellers Únicos': r.sellers.size,
-                        'Precio Más Bajo Detectado': r.low === Infinity ? '-' : r.low,
-                        'Precio Promedio Actual': Math.round(r.prices.reduce((a, b) => a + b, 0) / r.prices.length),
-                        'Con Cambios de Precio': r.conCambios
-                    }));
-
-                    const ws3 = XLSX.utils.json_to_sheet(resRows);
-                    ws3['!cols'] = [{ wch:35 },{ wch:14 },{ wch:20 },{ wch:14 },{ wch:22 },{ wch:18 },{ wch:18 }];
-                    XLSX.utils.book_append_sheet(wb, ws3, 'Resumen Productos');
-                }
-
-                // --- Descargar ---
-                const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
-                XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
-                statusEl.textContent = `✓ Reporte descargado — ${publicaciones.length} publicaciones únicas en ${exportDias} días`;
-                statusEl.className = 'export-status ok';
-
-            } catch (err) {
-                console.error('Error exportando:', err);
-                statusEl.textContent = 'Error: ' + err.message;
-                statusEl.className = 'export-status err';
-            } finally {
-                btn.disabled = false;
-                document.getElementById('exportGoText').textContent = 'Descargar Excel';
-            }
-        }
-
-        // ============================================================
-        // CSV Parser
-        // ============================================================
-        function cleanPrice(val) { return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0; }
-
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            if (lines.length < 2) throw new Error('El CSV está vacío');
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-            const findIdx = (keywords, fallback) => { const found = headers.findIndex(h => keywords.some(k => h.includes(k))); return found !== -1 ? found : fallback; };
-            const idx = { tienda: findIdx(['tienda', 'store', 'vendedor'], 0), producto: findIdx(['producto', 'product', 'item', 'sku'], 1), precioMin: findIdx(['nimo', 'minimo', 'min price'], 2), precioVenta: findIdx(['venta', 'sale'], 3), link: findIdx(['link', 'url', 'publicaci'], 4), id: findIdx(['id'], 5) };
-            const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const values = []; let inQ = false, cur = '';
-                for (const ch of lines[i]) { if (ch === '"') { inQ = !inQ; } else if (ch === ',' && !inQ) { values.push(cur.trim().replace(/^"|"$/g, '')); cur = ''; } else { cur += ch; } }
-                values.push(cur.trim().replace(/^"|"$/g, ''));
-                const get = (i) => (i >= 0 && i < values.length ? values[i] || '' : '');
-                const precioMin = cleanPrice(get(idx.precioMin)); const precioVenta = cleanPrice(get(idx.precioVenta));
-                if (precioMin === 0 && precioVenta === 0) continue;
-                const diferencia = precioVenta - precioMin; const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
-                const id = get(idx.id).trim(); let linkUrl = '';
-                if (id && id.toUpperCase().startsWith('MLA')) { linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`; }
-                data.push({ tienda: get(idx.tienda) || '(sin nombre)', producto: get(idx.producto) || '(sin producto)', precioMin, precioVenta, diferencia, porcentaje, link: linkUrl, id });
-            }
-            if (data.length === 0) throw new Error('No se encontraron filas con datos válidos.');
-            return data;
-        }
-
-        // ============================================================
-        // Carga de datos
-        // ============================================================
-        async function loadData() {
-            const loadingEl = document.getElementById('loading-state'), errorEl = document.getElementById('error-state'), contentEl = document.getElementById('dashboard-content'), refreshIcon = document.getElementById('refresh-icon');
-            refreshIcon.classList.add('fa-spin'); loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); errorEl.classList.add('hidden'); contentEl.style.opacity = '0.5'; contentEl.style.pointerEvents = 'none';
-            try {
-                const response = await fetch(SHEET_URL + '&t=' + Date.now());
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                const csvText = await response.text();
-                if (!csvText.trim()) throw new Error('La respuesta del servidor está vacía');
-                allData = parseCSV(csvText); processData(allData);
-                document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR'); errorEl.classList.add('hidden');
-            } catch (err) { console.error('Error:', err); document.getElementById('error-message').textContent = err.message; errorEl.classList.remove('hidden'); }
-            finally { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); contentEl.style.opacity = '1'; contentEl.style.pointerEvents = 'auto'; refreshIcon.classList.remove('fa-spin'); }
-        }
-
-        // ============================================================
-        // Procesar y renderizar
-        // ============================================================
-        function processData(data) {
-            document.getElementById('kpi-total').textContent = data.length;
-            document.getElementById('kpi-stores').textContent = new Set(data.map(d => d.tienda)).size;
-            document.getElementById('kpi-products').textContent = new Set(data.map(d => d.producto)).size;
-            const avg = data.reduce((s, d) => s + d.porcentaje, 0) / data.length;
-            document.getElementById('kpi-diff').textContent = avg.toFixed(1) + '%';
-            const critical = data.filter(d => d.porcentaje > 20).length, medium = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length, low = data.filter(d => d.porcentaje < 10).length;
-            document.getElementById('count-critical').textContent = critical; document.getElementById('count-medium').textContent = medium; document.getElementById('count-low').textContent = low;
-
-            const storeCounts = {}; data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
-            const topStores = Object.entries(storeCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
-            updateChart('storesChart', 'bar', { labels: topStores.map(s => s[0].length > 18 ? s[0].slice(0,16)+'…' : s[0]), datasets: [{ data: topStores.map(s => s[1]), backgroundColor: '#3b82f6', borderRadius: 6 }] }, { indexAxis: 'y', plugins: { legend: { display: false } } });
-
-            const prodCounts = {}; data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
-            const topProds = Object.entries(prodCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
-            updateChart('productsChart', 'bar', { labels: topProds.map(p => p[0].length > 22 ? p[0].slice(0,20)+'…' : p[0]), datasets: [{ data: topProds.map(p => p[1]), backgroundColor: '#f59e0b', borderRadius: 6 }] }, { plugins: { legend: { display: false } } });
-
-            updateChart('severityChart', 'doughnut', { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [critical, medium, low], backgroundColor: ['#ef4444','#f59e0b','#10b981'], borderWidth: 0 }] }, { cutout: '70%', plugins: { legend: { display: false } } });
-
-            const alertsEl = document.getElementById('alerts-container'); alertsEl.innerHTML = '';
-            const topAlerts = data.filter(d => d.porcentaje > 15).sort((a,b) => b.porcentaje-a.porcentaje).slice(0,5);
-            if (topAlerts.length === 0) { alertsEl.innerHTML = '<p class="text-slate-500 text-sm">No hay alertas críticas activas.</p>'; }
-            else { topAlerts.forEach(c => { const div = document.createElement('div'); div.className = 'flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700'; div.innerHTML = `<div class="w-2 h-2 rounded-full flex-shrink-0 ${c.porcentaje > 20 ? 'bg-red-500' : 'bg-amber-500'}"></div><div class="flex-1 min-w-0"><p class="text-sm font-medium text-white truncate">${c.tienda}</p><p class="text-xs text-slate-400 truncate">${c.producto}</p></div><div class="text-right flex-shrink-0 flex items-center gap-2"><p class="text-sm font-bold ${c.porcentaje > 20 ? 'text-red-400' : 'text-amber-400'}">-${c.porcentaje.toFixed(1)}%</p>${c.link ? `<a href="${c.link}" target="_blank" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : ''}</div>`; alertsEl.appendChild(div); }); }
-            renderTable(data);
-        }
-
-        function updateChart(canvasId, type, data, options) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            if (charts[canvasId]) charts[canvasId].destroy();
-            const isCartesian = type !== 'doughnut' && type !== 'pie';
-            charts[canvasId] = new Chart(ctx, { type, data, options: { responsive: true, maintainAspectRatio: false, ...options, scales: isCartesian ? { x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } }, y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', font: { size: 10 } } } } : {} } });
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
-            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">No hay resultados.</td></tr>'; return; }
-            data.forEach(row => {
-                const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-800/50 transition-colors';
-                let sClass = 'severity-low', sText = 'Baja';
-                if (row.porcentaje > 20) { sClass = 'severity-high'; sText = 'Crítica'; } else if (row.porcentaje >= 10) { sClass = 'severity-medium'; sText = 'Media'; }
-                tr.innerHTML = `<td class="px-6 py-4 font-medium text-white">${row.tienda}</td><td class="px-6 py-4 text-slate-300 text-xs">${row.producto}</td><td class="px-6 py-4 text-right text-slate-300">$${row.precioMin.toLocaleString('es-AR')}</td><td class="px-6 py-4 text-right text-slate-300">$${row.precioVenta.toLocaleString('es-AR')}</td><td class="px-6 py-4 text-right font-semibold text-red-400">-$${Math.abs(row.diferencia).toLocaleString('es-AR')} (${row.porcentaje.toFixed(1)}%)</td><td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-semibold ${sClass}">${sText}</span></td><td class="px-6 py-4 text-center">${row.link ? `<a href="${row.link}" target="_blank" rel="noopener" class="link-btn"><i class="fas fa-external-link-alt text-[10px]"></i> Ver</a>` : '<span class="text-slate-600 text-xs">—</span>'}</td>`;
-                tbody.appendChild(tr);
             });
+            if (evoRows.length === 0) evoRows.push({ 'Publicación': 'Sin cambios de precio en el período', 'Seller': '', 'Producto': '', 'Fecha del Cambio': '', 'Precio': '', 'Precio Anterior': '', 'Cambio $': '', 'Cambio %': '', 'Dirección': '' });
+            const ws2 = XLSX.utils.json_to_sheet(evoRows);
+            ws2['!cols'] = [{ wch:16 },{ wch:25 },{ wch:30 },{ wch:18 },{ wch:13 },{ wch:14 },{ wch:12 },{ wch:10 },{ wch:10 }];
+            XLSX.utils.book_append_sheet(wb, ws2, 'Evolución Precios');
         }
 
-        function filterTable() {
-            const search = document.getElementById('search-input').value.toLowerCase(), severity = document.getElementById('filter-severity').value;
-            const filtered = allData.filter(row => { const matchSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search); let matchSev = true; if (severity === 'high') matchSev = row.porcentaje > 20; else if (severity === 'medium') matchSev = row.porcentaje >= 10 && row.porcentaje <= 20; else if (severity === 'low') matchSev = row.porcentaje < 10; return matchSearch && matchSev; });
-            renderTable(filtered);
+        if (document.getElementById('expResumen').checked) {
+            const resumen = {};
+            publicaciones.forEach(p => {
+                const prod = p.producto || 'Sin producto';
+                if (!resumen[prod]) resumen[prod] = { producto: prod, pm: p.precio_minimo, pubs: 0, sellers: new Set(), low: Infinity, prices: [], conCambios: 0 };
+                resumen[prod].pubs++;
+                resumen[prod].sellers.add(p.seller_id);
+                if (p.precio_mas_bajo < resumen[prod].low) resumen[prod].low = p.precio_mas_bajo;
+                resumen[prod].prices.push(p.precio_actual);
+                if (p.cambios.length > 1) resumen[prod].conCambios++;
+            });
+            const resRows = Object.values(resumen).map(r => ({ 'Producto': r.producto, 'Precio Mínimo': r.pm, 'Publicaciones Infractoras': r.pubs, 'Sellers Únicos': r.sellers.size, 'Precio Más Bajo Detectado': r.low === Infinity ? '-' : r.low, 'Precio Promedio Actual': Math.round(r.prices.reduce((a, b) => a + b, 0) / r.prices.length), 'Con Cambios de Precio': r.conCambios }));
+            const ws3 = XLSX.utils.json_to_sheet(resRows);
+            ws3['!cols'] = [{ wch:35 },{ wch:14 },{ wch:20 },{ wch:14 },{ wch:22 },{ wch:18 },{ wch:18 }];
+            XLSX.utils.book_append_sheet(wb, ws3, 'Resumen Productos');
         }
 
-        function sortTable(column) {
-            if (sortState.column === column) sortState.asc = !sortState.asc; else { sortState.column = column; sortState.asc = true; }
-            allData.sort((a, b) => { const va = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column]; const vb = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column]; return sortState.asc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0); });
-            filterTable();
-        }
+        const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+        XLSX.writeFile(wb, `Reporte_Infractores_${exportDias}d_${fecha}.xlsx`);
+        statusEl.textContent = `✓ Reporte descargado — ${publicaciones.length} publicaciones únicas en ${exportDias} días`;
+        statusEl.className = 'export-status ok';
 
-        window.addEventListener('load', loadData);
-        setInterval(loadData, 5 * 60 * 1000);
-    </script>
+    } catch (err) {
+        console.error('Error exportando:', err);
+        statusEl.textContent = 'Error: ' + err.message;
+        statusEl.className = 'export-status err';
+    } finally {
+        btn.disabled = false;
+        document.getElementById('exportGoText').textContent = 'Descargar Excel';
+    }
+}
+
+// ============================================================
+// CSV Parser
+// ============================================================
+function cleanPrice(val) { return parseFloat((val || '0').replace(/[$\s]/g, '').replace(/,/g, '')) || 0; }
+
+function parseCSV(csvText) {
+    const lines = csvText.trim().split('\n');
+    if (lines.length < 2) throw new Error('El CSV está vacío');
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+    const findIdx = (keywords, fallback) => { const found = headers.findIndex(h => keywords.some(k => h.includes(k))); return found !== -1 ? found : fallback; };
+    const idx = { tienda: findIdx(['tienda', 'store', 'vendedor'], 0), producto: findIdx(['producto', 'product', 'item', 'sku'], 1), precioMin: findIdx(['nimo', 'minimo', 'min price'], 2), precioVenta: findIdx(['venta', 'sale'], 3), link: findIdx(['link', 'url', 'publicaci'], 4), id: findIdx(['id'], 5) };
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = []; let inQ = false, cur = '';
+        for (const ch of lines[i]) { if (ch === '"') { inQ = !inQ; } else if (ch === ',' && !inQ) { values.push(cur.trim().replace(/^"|"$/g, '')); cur = ''; } else { cur += ch; } }
+        values.push(cur.trim().replace(/^"|"$/g, ''));
+        const get = (i) => (i >= 0 && i < values.length ? values[i] || '' : '');
+        const precioMin = cleanPrice(get(idx.precioMin)); const precioVenta = cleanPrice(get(idx.precioVenta));
+        if (precioMin === 0 && precioVenta === 0) continue;
+        const diferencia = precioVenta - precioMin; const porcentaje = precioMin > 0 ? Math.abs(diferencia / precioMin) * 100 : 0;
+        const id = get(idx.id).trim(); let linkUrl = '';
+        if (id && id.toUpperCase().startsWith('MLA')) { linkUrl = `https://articulo.mercadolibre.com.ar/${id.replace(/^MLA/i, 'MLA-')}`; }
+        data.push({ tienda: get(idx.tienda) || '(sin nombre)', producto: get(idx.producto) || '(sin producto)', precioMin, precioVenta, diferencia, porcentaje, link: linkUrl, id });
+    }
+    if (data.length === 0) throw new Error('No se encontraron filas con datos válidos.');
+    return data;
+}
+
+// ============================================================
+// Carga de datos
+// ============================================================
+async function loadData() {
+    const loadingEl = document.getElementById('loading-state');
+    const errorEl   = document.getElementById('error-state');
+    const contentEl = document.getElementById('dashboard-content');
+    const refreshIcon = document.getElementById('refresh-icon');
+
+    refreshIcon.classList.add('fa-spin');
+    loadingEl.classList.remove('hidden');
+    loadingEl.classList.add('flex');
+    errorEl.classList.add('hidden');
+    contentEl.style.opacity = '0.4';
+    contentEl.style.pointerEvents = 'none';
+
+    try {
+        const response = await fetch(SHEET_URL + '&t=' + Date.now());
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const csvText = await response.text();
+        if (!csvText.trim()) throw new Error('La respuesta del servidor está vacía');
+        allData = parseCSV(csvText);
+        processData(allData);
+        document.getElementById('last-update').textContent = new Date().toLocaleString('es-AR', {
+            hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit'
+        });
+        errorEl.classList.add('hidden');
+    } catch (err) {
+        console.error('Error:', err);
+        document.getElementById('error-message').textContent = err.message;
+        errorEl.classList.remove('hidden');
+    } finally {
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('flex');
+        contentEl.style.opacity = '1';
+        contentEl.style.pointerEvents = 'auto';
+        refreshIcon.classList.remove('fa-spin');
+    }
+}
+
+// ============================================================
+// Procesar y renderizar
+// ============================================================
+function processData(data) {
+    document.getElementById('kpi-total').textContent    = data.length.toLocaleString('es-AR');
+    document.getElementById('kpi-stores').textContent   = new Set(data.map(d => d.tienda)).size;
+    document.getElementById('kpi-products').textContent = new Set(data.map(d => d.producto)).size;
+    const avg = data.reduce((s, d) => s + d.porcentaje, 0) / data.length;
+    document.getElementById('kpi-diff').textContent = avg.toFixed(1) + '%';
+
+    const critical = data.filter(d => d.porcentaje > 20).length;
+    const medium   = data.filter(d => d.porcentaje >= 10 && d.porcentaje <= 20).length;
+    const low      = data.filter(d => d.porcentaje < 10).length;
+    document.getElementById('count-critical').textContent = critical;
+    document.getElementById('count-medium').textContent   = medium;
+    document.getElementById('count-low').textContent      = low;
+
+    // Stores chart
+    const storeCounts = {};
+    data.forEach(d => { storeCounts[d.tienda] = (storeCounts[d.tienda] || 0) + 1; });
+    const topStores = Object.entries(storeCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
+    updateChart('storesChart', 'bar', {
+        labels: topStores.map(s => s[0].length > 22 ? s[0].slice(0,20)+'…' : s[0]),
+        datasets: [{ data: topStores.map(s => s[1]), backgroundColor: 'rgba(0,206,184,0.55)', hoverBackgroundColor: '#00CEB8', borderRadius: 4, borderSkipped: false }]
+    }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+    // Products chart
+    const prodCounts = {};
+    data.forEach(d => { prodCounts[d.producto] = (prodCounts[d.producto] || 0) + 1; });
+    const topProds = Object.entries(prodCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
+    updateChart('productsChart', 'bar', {
+        labels: topProds.map(p => p[0].length > 24 ? p[0].slice(0,22)+'…' : p[0]),
+        datasets: [{ data: topProds.map(p => p[1]), backgroundColor: 'rgba(244,63,94,0.55)', hoverBackgroundColor: '#F43F5E', borderRadius: 4, borderSkipped: false }]
+    }, { plugins: { legend: { display: false } } });
+
+    // Severity chart
+    updateChart('severityChart', 'doughnut', {
+        labels: ['Crítico', 'Medio', 'Bajo'],
+        datasets: [{ data: [critical, medium, low], backgroundColor: ['#F43F5E','#F59E0B','#00CEB8'], borderWidth: 0, hoverOffset: 5 }]
+    }, { cutout: '74%', plugins: { legend: { display: false } } });
+
+    // Alerts
+    const alertsEl = document.getElementById('alerts-container');
+    alertsEl.innerHTML = '';
+    const topAlerts = data.filter(d => d.porcentaje > 15).sort((a,b) => b.porcentaje-a.porcentaje).slice(0,5);
+    if (topAlerts.length === 0) {
+        alertsEl.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No hay alertas críticas activas.</p>';
+    } else {
+        topAlerts.forEach(c => {
+            const div = document.createElement('div');
+            div.className = `alert-item ${c.porcentaje > 20 ? 'critical' : 'medium'}`;
+            div.innerHTML = `
+                <div style="flex:1; min-width:0;">
+                    <p style="font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.tienda}</p>
+                    <p style="font-size:12px; color:var(--text-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">${c.producto}</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+                    <span class="font-data" style="font-size:14px; color:${c.porcentaje > 20 ? 'var(--danger)' : 'var(--warning)'};">-${c.porcentaje.toFixed(1)}%</span>
+                    ${c.link ? `<a href="${c.link}" target="_blank" class="link-btn"><i class="fas fa-arrow-up-right-from-square" style="font-size:9px;"></i>&nbsp;Ver</a>` : ''}
+                </div>`;
+            alertsEl.appendChild(div);
+        });
+    }
+
+    renderTable(data);
+}
+
+function updateChart(canvasId, type, data, options) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    if (charts[canvasId]) charts[canvasId].destroy();
+    const isDoughnut = type === 'doughnut';
+    const gridColor  = 'rgba(255,255,255,0.04)';
+    const tickColor  = '#3D4659';
+    charts[canvasId] = new Chart(ctx, {
+        type, data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            ...options,
+            plugins: {
+                ...(options.plugins || {}),
+                tooltip: {
+                    backgroundColor: '#131720',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    titleColor: '#ECF0F7',
+                    bodyColor: '#8892A4',
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Manrope', size: 12, weight: '600' },
+                    bodyFont:  { family: 'DM Mono', size: 12 },
+                }
+            },
+            scales: isDoughnut ? {} : {
+                x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'Manrope' } }, border: { display: false } },
+                y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'Manrope' } }, border: { display: false } }
+            }
+        }
+    });
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:36px; text-align:center; color:var(--text-muted); font-size:13px;">No hay resultados.</td></tr>';
+        return;
+    }
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        let badgeClass = 'badge-low', sText = 'Baja';
+        if (row.porcentaje > 20)      { badgeClass = 'badge-high';   sText = 'Crítica'; }
+        else if (row.porcentaje >= 10) { badgeClass = 'badge-medium'; sText = 'Media'; }
+        tr.innerHTML = `
+            <td style="font-size:13px; font-weight:600; color:var(--text); max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${row.tienda}</td>
+            <td style="font-size:12px; color:var(--text-sub); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${row.producto}</td>
+            <td style="text-align:right; font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted);">$${row.precioMin.toLocaleString('es-AR')}</td>
+            <td style="text-align:right; font-family:'DM Mono',monospace; font-size:12px; color:var(--text);">$${row.precioVenta.toLocaleString('es-AR')}</td>
+            <td style="text-align:right; white-space:nowrap;">
+                <span style="font-family:'DM Mono',monospace; font-size:12px; color:var(--danger);">-$${Math.abs(row.diferencia).toLocaleString('es-AR')}</span>
+                <span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--danger); opacity:0.6; margin-left:5px;">${row.porcentaje.toFixed(1)}%</span>
+            </td>
+            <td style="text-align:center;"><span class="badge ${badgeClass}">${sText}</span></td>
+            <td style="text-align:center;">${row.link ? `<a href="${row.link}" target="_blank" rel="noopener" class="link-btn"><i class="fas fa-arrow-up-right-from-square" style="font-size:9px;"></i>&nbsp;Ver</a>` : '<span style="color:var(--text-muted); font-size:12px;">—</span>'}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function filterTable() {
+    const search   = document.getElementById('search-input').value.toLowerCase();
+    const severity = document.getElementById('filter-severity').value;
+    const filtered = allData.filter(row => {
+        const matchSearch = row.tienda.toLowerCase().includes(search) || row.producto.toLowerCase().includes(search);
+        let matchSev = true;
+        if (severity === 'high')   matchSev = row.porcentaje > 20;
+        else if (severity === 'medium') matchSev = row.porcentaje >= 10 && row.porcentaje <= 20;
+        else if (severity === 'low')    matchSev = row.porcentaje < 10;
+        return matchSearch && matchSev;
+    });
+    renderTable(filtered);
+}
+
+function sortTable(column) {
+    if (sortState.column === column) sortState.asc = !sortState.asc;
+    else { sortState.column = column; sortState.asc = true; }
+    allData.sort((a, b) => {
+        const va = typeof a[column] === 'string' ? a[column].toLowerCase() : a[column];
+        const vb = typeof b[column] === 'string' ? b[column].toLowerCase() : b[column];
+        return sortState.asc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+    });
+    filterTable();
+}
+
+window.addEventListener('load', loadData);
+setInterval(loadData, 5 * 60 * 1000);
+</script>
 </body>
 </html>
